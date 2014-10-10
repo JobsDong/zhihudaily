@@ -16,7 +16,7 @@
     <div class="header navbar-fixed-top">
         <div class="container-fixed-width clearfix">
             <h1 class="logo">
-                <a href="home" title="知乎" class="link-logo" target="_self"></a>
+                <a href="/" title="知乎" class="link-logo" target="_self"></a>
             </h1>
 
             <div class="link">
@@ -38,45 +38,18 @@
             </div>
 
             <div class="row features">
-                <div class="col-md-4">
-                    <div href="" class="feature">
-                        <div class="mask"></div>
-                        <img src="">
-                        <a href="">
-                            <h3>title</h3>
-                        </a>
-                    </div>
-                </div>
 
+                {% for news in news_list %}
                 <div class="col-md-4">
-                    <div href="" class="feature">
+                    <div href="{{ escape(news[2]) }}" class="feature">
                         <div class="mask"></div>
-                        <img src="">
-                        <a href="">
-                            <h3></h3>
+                        <img src="{{ escape(news[5]) }}">
+                        <a href="{{ escape(news[2]) }}">
+                            <h3>{{ escape(news[1]) }}</h3>
                         </a>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div href="/story/233" class="feature">
-                        <div class="mask"></div>
-                        <img src="http://p4.zhimg.com/30/59/30594279d368534c6c2f91b2c00c7806.jpg">
-                        <a href="/story/233">
-                            <h3>title</h3>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div href="/day/323" class="feature">
-                        <div class="mask"></div>
-                        <img src="">
-                        <a href="/day/323">
-                            <h3>3245354</h3>
-                        </a>
-                    </div>
-                </div>
+                {% end %}
 
             </div>
 
@@ -85,10 +58,10 @@
 
     <div class="footer">
         <div class="f">
-            <a target="_self" href="/day/323" class="page-btn">前一天</a>
+            <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>
         </div>
 
-        <br><div class="txt">内容转载自 知乎日报 ，项目开源于Github ，感谢贴图库提供图片外链</div>
+        <br><div class="txt">内容转载自 知乎日报 ，项目开源于Github </div>
     </div>
 
 </body>

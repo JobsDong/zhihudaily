@@ -47,10 +47,11 @@ class ZhiHu(object):
 		return json.loads(content)
 
 	def _decode_msg(self, msg):
-		if isinstance(msg, bytes):
-			msg = msg.decode('utf-8')
+		if isinstance(msg, str):
+			msg = unicode(msg, 'utf-8')
 
 		return msg
+
 
 	def _do_http_request(self, url):
 		http, content, msg, error, status = None, None, None, None, None

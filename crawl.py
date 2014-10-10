@@ -21,7 +21,6 @@ def fetch_before(from_date, end_date=None):
 	temp_date = from_date + datetime.timedelta(days=1)
 	while temp_date < end_date:
 		date_str = temp_date.strftime("%Y%m%d")
-		print date_str
 
 		# 获取最新的news_id列表
 		latest_news = zh.get_before_news(date_str)
@@ -90,3 +89,7 @@ def _extract_date_str(latest_news):
 	:return:
 	"""
 	return latest_news['date']
+
+
+if __name__ == "__main__":
+	fetch_latest()
