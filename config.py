@@ -16,6 +16,7 @@ if debug:
 	DB_PORT = 3306
 
 	INTERVAL = 10
+	BUCKET = "dailyimage"
 else:
 	import sae.const
 
@@ -28,3 +29,4 @@ else:
 
 	# 采集间隔
 	INTERVAL = 60 * 60
+	BUCKET = "dailyimage"

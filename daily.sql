@@ -6,5 +6,7 @@ CREATE TABLE IF NOT EXISTS `news` (
 `body` text NOT NULL,
 `image` varchar(100) NOT NULL,
 `image_source` varchar(100) NOT NULL,
+`image_public_url` varchar(100) NOT NULL,
+`insert_time` timestamp NOT NULL,
 PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
