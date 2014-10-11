@@ -15,11 +15,11 @@ class BaseHandler(tornado.web.RequestHandler):
 	"""
 
 	def get_error_html(self, status_code, **kwargs):
-		reason = self._reason or "Server Error"
-		exception = kwargs.get('exception', None)
+		reason = "Server Error" if not hasattr(self, "_reason") else self._reason
+		exception = kwargs.get('exception', "")
 
 		return self.render_string("error.html", code=str(status_code),
-		                          reason=reason, exception=exception)
+		                          reason=str(reason), exception=str(exception))
 
 
 class CrawlHandler(BaseHandler):

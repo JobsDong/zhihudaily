@@ -42,6 +42,7 @@ def fetch_before(date_str):
 				not_exists_news_ids.append(news_id)
 
 		# 获取news, 并保存到数据库
+		not_exists_news_ids.reverse()
 		for news_id in not_exists_news_ids:
 			try:
 				news = zh.get_news(news_id)
@@ -77,6 +78,7 @@ def fetch_latest():
 				not_exists_news_ids.append(news_id)
 
 		# 获取news, 并保存到数据库
+		not_exists_news_ids.reverse()
 		for news_id in not_exists_news_ids:
 			try:
 				news = zh.get_news(news_id)

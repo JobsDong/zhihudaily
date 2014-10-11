@@ -5,6 +5,7 @@
 """
 
 import MySQLdb
+import datetime
 import config
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -34,15 +35,15 @@ class Dao(object):
 		image = news.get('image', '') or news.get('theme_image', '')
 		image_source = news.get('image_source', '') or news.get('theme_name', '')
 
-		self._cu.execute("INSERT INTO news VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+		self._cu.execute("INSERT INTO news VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
 		                 [decode(news['id']), decode(news['title']),
 		                  decode(news['share_url']), decode(date_str),
 		                  decode(body), decode(image),
-		                  decode(image_source), decode(public_image_url)])
+		                  decode(image_source), decode(public_image_url), datetime.datetime.now()])
 		self._cx.commit()
 
 	def select_news_list(self, date_str):
-		self._cu.execute("SELECT * FROM news WHERE date=%s", [date_str])
+		self._cu.execute("SELECT * FROM news WHERE date=%s ORDER BY insert_time DESC", [date_str])
 		news = self._cu.fetchall()
 		return news
 
