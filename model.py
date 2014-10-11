@@ -29,16 +29,16 @@ class Dao(object):
 		self._cu.execute("SELECT id FROM news WHERE id=%s", [str(news_id)])
 		return self._cu.fetchone() is not None
 
-	def insert(self, date_str, news):
+	def insert(self, public_image_url, date_str, news):
 		body = news.get('body', '')
 		image = news.get('image', '') or news.get('theme_image', '')
 		image_source = news.get('image_source', '') or news.get('theme_name', '')
 
-		self._cu.execute("INSERT INTO news VALUES (%s, %s, %s, %s, %s, %s, %s)",
+		self._cu.execute("INSERT INTO news VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
 		                 [decode(news['id']), decode(news['title']),
 		                  decode(news['share_url']), decode(date_str),
 		                  decode(body), decode(image),
-		                  decode(image_source)])
+		                  decode(image_source), decode(public_image_url)])
 		self._cx.commit()
 
 	def select_news_list(self, date_str):
