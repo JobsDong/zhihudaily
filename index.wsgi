@@ -1,34 +1,27 @@
 #!/usr/bin/python
 # -*- coding=utf-8 -*-
 
-"""知乎日报API
+"""知乎日报
 """
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+from config import debug
+
+if not debug:
+	import sae
+
 import os
-import thread
-import time
-
-import tornado.web
-
-import config
-import model
-import crawl
+import tornado.wsgi
 import handler
 
 
-def loop_crawl(interval=60 * 60):
-	while True:
-		crawl.fetch_latest()
-		time.sleep(interval)
-
-
-class Application(tornado.web.Application):
+class Application(tornado.wsgi.WSGIApplication):
 
 	def __init__(self):
 		handlers = [
 			(r'/', handler.DayHandler),
+			(r'/crawl', handler.CrawlHandler),
 		    (r'/.*', handler.ErrorHandler),
 		]
 
@@ -38,13 +31,14 @@ class Application(tornado.web.Application):
 		    "log_file_prefix": "tornado.log",
 		}
 
-		tornado.web.Application.__init__(self, handlers, **settings)
-
-		# 数据库链接
-		self.db = model.Dao()
-
-		# 定时程序
-		thread.start_new_thread(loop_crawl, (config.INTERVAL,))
+		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
 
 
-application = Application()
+app = Application()
+
+if not debug:
+	application = sae.create_wsgi_app(app)
+else:
+	import wsgiref.simple_server
+	server = wsgiref.simple_server.make_server("", 8080, app)
+	server.serve_forever()

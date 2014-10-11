@@ -4,15 +4,27 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import sae.const
+from os import environ
 
-# 数据库配置
-DB_HOST = sae.const.MYSQL_HOST
-DB_NAME = sae.const.MYSQL_DB
-DB_USER = sae.const.MYSQL_USER
-DB_PASS = sae.const.MYSQL_PASS
-DB_PORT = int(sae.const.MYSQL_PORT)
+debug = not environ.get("APP_NAME", "")
 
+if debug:
+	DB_HOST = "127.0.0.1"
+	DB_NAME = "daily"
+	DB_USER = "root"
+	DB_PASS = "root"
+	DB_PORT = 3306
 
-# 采集间隔
-INTERVAL = 60 * 60
+	INTERVAL = 10
+else:
+	import sae.const
+
+	# 数据库配置
+	DB_HOST = sae.const.MYSQL_HOST
+	DB_NAME = sae.const.MYSQL_DB
+	DB_USER = sae.const.MYSQL_USER
+	DB_PASS = sae.const.MYSQL_PASS
+	DB_PORT = int(sae.const.MYSQL_PORT)
+
+	# 采集间隔
+	INTERVAL = 60 * 60

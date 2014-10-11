@@ -1,4 +1,12 @@
-name:
+name: zhihurewen
 version: 1
 
-worker: tornado
+cron:
+- description: crawl latest news
+  url: "/crawl"
+  schedule: "0 */1 * * *"
+
+
+libraries:
+- name: "tornado"
+  version: "4.0.0"
