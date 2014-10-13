@@ -3,7 +3,7 @@ version: 1
 
 cron:
 - description: crawl latest news
-  url: "/crawl"
+  url: /crawl
   schedule: "0 */1 * * *"
 
 
