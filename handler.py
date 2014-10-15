@@ -6,7 +6,7 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import datetime
 import tornado.web
-import model
+import database
 import crawl
 
 
@@ -40,7 +40,7 @@ class DayHandler(BaseHandler):
 	"""
 	def __init__(self, application, request, **kwargs):
 		super(DayHandler, self).__init__(application, request, **kwargs)
-		self._db = model.Dao()
+		self._db = database.Dao()
 
 	def get(self, *args, **kwargs):
 		default_date_str = datetime.datetime.now().strftime("%Y%m%d")

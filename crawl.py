@@ -7,13 +7,14 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import os
+import logging
 import urlparse
 import hashlib
 import httplib
 
 from config import debug, BUCKET
 import daily
-import model
+import database
 
 if not debug:
 	from sae.storage import Connection
@@ -41,7 +42,7 @@ def fetch_before(date_str):
 	:return:
 	"""
 	zh = daily.ZhiHu()
-	dao = model.Dao()
+	dao = database.Dao()
 	try:
 		# 获取最新的news_id列表
 		latest_news = zh.get_before_news(date_str)
@@ -65,7 +66,7 @@ def fetch_before(date_str):
 				public_image_url = _store_image(news['image'], image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
-				print e
+				logging.error("fetch before error", e)
 	finally:
 		dao.close()
 
@@ -76,7 +77,7 @@ def fetch_latest():
 	:return:
 	"""
 	zh = daily.ZhiHu()
-	dao = model.Dao()
+	dao = database.Dao()
 
 	try:
 		# 获取最新的news_id列表
@@ -101,7 +102,7 @@ def fetch_latest():
 				public_image_url = _store_image(news['image'], image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
-				print e
+				logging.error("fetch latest error", e)
 
 	finally:
 		dao.close()
@@ -151,7 +152,6 @@ def _extract_news_ids(latest_news):
 
 	stories = latest_news['stories']
 	for story in stories:
-		print story['id'], story['title']
 		news_ids.append(story['id'])
 
 	return news_ids

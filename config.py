@@ -23,8 +23,6 @@ if debug:
 	DB_USER = "root"
 	DB_PASS = "root"
 	DB_PORT = 3306
-
-	INTERVAL = 10
 else:
 	import sae.const
 
@@ -34,6 +32,3 @@ else:
 	DB_USER = sae.const.MYSQL_USER
 	DB_PASS = sae.const.MYSQL_PASS
 	DB_PORT = int(sae.const.MYSQL_PORT)
-
-	# 采集间隔（second）
-	INTERVAL = 60 * 60
