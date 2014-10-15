@@ -6,19 +6,33 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from config import debug, BUCKET
-
+import os
+import logging
 import urlparse
-
 import hashlib
 import httplib
-import daily
-import model
 
-if debug:
-	pass
-else:
+from config import debug, BUCKET
+import daily
+import database
+
+if not debug:
 	from sae.storage import Connection
+else:
+	from config import static_path
+
+	class Connection(object):
+
+		def put_object(self, bucket_name, object_name, image_data, image_type):
+			bucket_dir = os.path.join(static_path, bucket_name)
+			if not os.path.exists(bucket_dir):
+				os.mkdir(bucket_dir)
+			with open(os.path.join(bucket_dir, object_name),
+			          "wb") as object_file:
+				object_file.write(image_data)
+
+		def generate_url(self, bucket_name, object_name):
+			return "/static/%s/%s" % (bucket_name, object_name)
 
 
 def fetch_before(date_str):
@@ -28,7 +42,7 @@ def fetch_before(date_str):
 	:return:
 	"""
 	zh = daily.ZhiHu()
-	dao = model.Dao()
+	dao = database.Dao()
 	try:
 		# 获取最新的news_id列表
 		latest_news = zh.get_before_news(date_str)
@@ -52,7 +66,7 @@ def fetch_before(date_str):
 				public_image_url = _store_image(news['image'], image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
-				print e
+				logging.error("fetch before error", e)
 	finally:
 		dao.close()
 
@@ -63,7 +77,7 @@ def fetch_latest():
 	:return:
 	"""
 	zh = daily.ZhiHu()
-	dao = model.Dao()
+	dao = database.Dao()
 
 	try:
 		# 获取最新的news_id列表
@@ -88,7 +102,7 @@ def fetch_latest():
 				public_image_url = _store_image(news['image'], image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
-				print e
+				logging.error("fetch latest error", e)
 
 	finally:
 		dao.close()
@@ -138,7 +152,6 @@ def _extract_news_ids(latest_news):
 
 	stories = latest_news['stories']
 	for story in stories:
-		print story['id'], story['title']
 		news_ids.append(story['id'])
 
 	return news_ids
