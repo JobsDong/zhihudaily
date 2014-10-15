@@ -46,7 +46,8 @@ class DayHandler(BaseHandler):
 		default_date_str = datetime.datetime.now().strftime("%Y%m%d")
 		date_str = self.get_argument("date", default_date_str)
 		news_list = self._db.select_news_list(date_str)
-		self.render("day.html", before_date=before_date_str(date_str),
+		self.render("day.html", now_date=now_date_str(date_str),
+		            before_date=before_date_str(date_str),
 		            news_list=news_list)
 
 
@@ -67,3 +68,10 @@ def before_date_str(date_str):
 	now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
 	before_date = now_date - datetime.timedelta(days=1)
 	return before_date.strftime("%Y%m%d")
+
+
+def now_date_str(date_str):
+	if datetime.datetime.now().strftime("%Y%m%d") == date_str:
+		return "今日热闻"
+	else:
+		return date_str
