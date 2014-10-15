@@ -4,9 +4,18 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from os import environ
+import os
 
-debug = not environ.get("APP_NAME", "")
+debug = not os.environ.get("APP_NAME", "")
+
+# static path
+static_path = os.path.join(os.path.dirname(__file__), "static")
+
+# template path
+template_path = os.path.join(os.path.dirname(__file__), "templates")
+
+# 图片存储的bucket name
+BUCKET = "dailyimage"
 
 if debug:
 	DB_HOST = "127.0.0.1"
@@ -16,7 +25,6 @@ if debug:
 	DB_PORT = 3306
 
 	INTERVAL = 10
-	BUCKET = "dailyimage"
 else:
 	import sae.const
 
@@ -27,6 +35,5 @@ else:
 	DB_PASS = sae.const.MYSQL_PASS
 	DB_PORT = int(sae.const.MYSQL_PORT)
 
-	# 采集间隔
+	# 采集间隔（second）
 	INTERVAL = 60 * 60
-	BUCKET = "dailyimage"

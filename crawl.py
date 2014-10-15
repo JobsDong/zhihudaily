@@ -6,19 +6,32 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from config import debug, BUCKET
-
+import os
 import urlparse
-
 import hashlib
 import httplib
+
+from config import debug, BUCKET
 import daily
 import model
 
-if debug:
-	pass
-else:
+if not debug:
 	from sae.storage import Connection
+else:
+	from config import static_path
+
+	class Connection(object):
+
+		def put_object(self, bucket_name, object_name, image_data, image_type):
+			bucket_dir = os.path.join(static_path, bucket_name)
+			if not os.path.exists(bucket_dir):
+				os.mkdir(bucket_dir)
+			with open(os.path.join(bucket_dir, object_name),
+			          "wb") as object_file:
+				object_file.write(image_data)
+
+		def generate_url(self, bucket_name, object_name):
+			return "/static/%s/%s" % (bucket_name, object_name)
 
 
 def fetch_before(date_str):

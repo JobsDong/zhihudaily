@@ -6,7 +6,7 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from config import debug
+from config import debug, static_path, template_path
 
 if not debug:
 	import sae
@@ -26,9 +26,9 @@ class Application(tornado.wsgi.WSGIApplication):
 		]
 
 		settings = {
-			"static_path": os.path.join(os.path.dirname(__file__), "static"),
-		    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-		    "log_file_prefix": "tornado.log",
+			"static_path": static_path,
+		    "template_path": template_path,
+		    "debug": debug,
 		}
 
 		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
