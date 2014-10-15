@@ -6,12 +6,14 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from config import debug
+from config import debug, static_path, template_path
 
 if not debug:
 	import sae
+else:
+	from tornado.options import define, options
+	define("port", default=8080, help="run on the given port", type=int)
 
-import os
 import tornado.wsgi
 import handler
 
@@ -26,9 +28,9 @@ class Application(tornado.wsgi.WSGIApplication):
 		]
 
 		settings = {
-			"static_path": os.path.join(os.path.dirname(__file__), "static"),
-		    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-		    "log_file_prefix": "tornado.log",
+			"static_path": static_path,
+		    "template_path": template_path,
+		    "debug": debug,
 		}
 
 		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
@@ -40,5 +42,9 @@ if not debug:
 	application = sae.create_wsgi_app(app)
 else:
 	import wsgiref.simple_server
-	server = wsgiref.simple_server.make_server("", 8080, app)
-	server.serve_forever()
+	try:
+		tornado.options.parse_command_line()
+		server = wsgiref.simple_server.make_server("", options.port, app)
+		server.serve_forever()
+	except KeyboardInterrupt:
+		print "close"
