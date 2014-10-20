@@ -17,6 +17,9 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 # 图片存储的bucket name
 BUCKET = "dailyimage"
 
+# 密码的md5
+secret = "76a4cebbe7af10ffd169cd9494adcf2f"
+
 if debug:
 	DB_HOST = "127.0.0.1"
 	DB_NAME = "daily"
