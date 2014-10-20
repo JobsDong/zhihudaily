@@ -33,14 +33,14 @@ class CrawlHandler(BaseHandler):
 		m = hashlib.md5()
 		m.update(secret)
 		if m.hexdigest() != config.secret:
-			self.set_status(403, "password wrong")
+			self.set_status(403)
 		else:
 			date_str = self.get_argument("date", None)
 			if date_str:
 				crawl.fetch_before(date_str)
 			else:
 				crawl.fetch_latest()
-			self.set_status(200, "success")
+			self.set_status(200)
 
 
 class DayHandler(BaseHandler):
