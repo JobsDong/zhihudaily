@@ -3,8 +3,8 @@ version: 1
 
 cron:
 - description: crawl latest news
-  url: /crawl
-  schedule: "0 */1 * * *"
+  url: /crawl?secret=311521
+  schedule: "57 */1 * * *"
 
 
 libraries:

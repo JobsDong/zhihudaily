@@ -5,9 +5,11 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import datetime
+import hashlib
 import tornado.web
 import database
 import crawl
+import config
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -27,12 +29,18 @@ class CrawlHandler(BaseHandler):
 	"""
 
 	def get(self, *args, **kwargs):
-		date_str = self.get_argument("date", None)
-		if date_str:
-			crawl.fetch_before(date_str)
+		secret = self.get_argument("secret", "")
+		m = hashlib.md5()
+		m.update(secret)
+		if m.hexdigest() != config.secret:
+			self.set_status(403)
 		else:
-			crawl.fetch_latest()
-		self.finish()
+			date_str = self.get_argument("date", None)
+			if date_str:
+				crawl.fetch_before(date_str)
+			else:
+				crawl.fetch_latest()
+			self.set_status(200)
 
 
 class DayHandler(BaseHandler):
@@ -46,6 +54,11 @@ class DayHandler(BaseHandler):
 		default_date_str = datetime.datetime.now().strftime("%Y%m%d")
 		date_str = self.get_argument("date", default_date_str)
 		news_list = self._db.select_news_list(date_str)
+		# empty
+		if len(news_list) == 0 and date_str == default_date_str:
+			date_str = before_date_str(default_date_str)
+			news_list = self._db.select_news_list(date_str)
+
 		self.render("day.html", now_date=now_date_str(date_str),
 		            before_date=before_date_str(date_str),
 		            news_list=news_list)
