@@ -55,11 +55,15 @@ SAE环境搭建
 
 	# bucket name
 	BUCKET = "dailyimage"
+	# 密码
+	secret = "311521"
 
 5. 修改sae的配置文件config.yaml::
 
 	# APP NAME
 	name: zhihurewen
+	# url后面的密码
+    url: /crawl?secret=311521
 
 6. 上传代码
 
@@ -68,9 +72,9 @@ SAE环境搭建
 ==============
 
 1. 本地测试环境中，数据不会自动采集，可以手动启动采集当天的数据
-	"http://localhost:{port}/crawl
+	"http://localhost:{port}/crawl?secret={secret}
 
 2. 本地测试环境，采集某一天的数据
-	"http://localhost:{port}/crawl?date=20140808
+	"http://localhost:{port}/crawl?date=20140808&secret={secret}
 
 3. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
