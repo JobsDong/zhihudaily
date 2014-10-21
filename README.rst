@@ -63,7 +63,7 @@ SAE环境搭建
 	# APP NAME
 	name: zhihurewen
 	# url后面的密码
-    url: /crawl?secret=311521
+	url: /crawl?secret=311521
 
 6. 上传代码
 

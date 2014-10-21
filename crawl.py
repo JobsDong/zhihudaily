@@ -97,9 +97,10 @@ def fetch_latest():
 			try:
 				news = zh.get_news(news_id)
 				# 下载图片
-				image_type, image_data = _fetch_image(news['share_url'], news['image'])
+				image_url = news['image'] if 'image' in news else news['theme_image']
+				image_type, image_data = _fetch_image(news['share_url'], image_url)
 				# 存储图片
-				public_image_url = _store_image(news['image'], image_type, image_data)
+				public_image_url = _store_image(image_url, image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
 				logging.error("fetch latest error", e)

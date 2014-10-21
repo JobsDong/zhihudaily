@@ -24,13 +24,13 @@ class Application(tornado.wsgi.WSGIApplication):
 		handlers = [
 			(r'/', handler.DayHandler),
 			(r'/crawl', handler.CrawlHandler),
-		    (r'/.*', handler.ErrorHandler),
+			(r'/.*', handler.ErrorHandler),
 		]
 
 		settings = {
 			"static_path": static_path,
-		    "template_path": template_path,
-		    "debug": debug,
+			"template_path": template_path,
+			"debug": debug,
 		}
 
 		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
