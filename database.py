@@ -28,7 +28,7 @@ class Dao(object):
                              user=config.DB_USER, passwd=config.DB_PASS,
                              db=config.DB_NAME)
 		self._last_use_time = time.time()
-		self._max_idle_time = 7 * 3600
+		self._max_idle_time = 30
 		try:
 			self.reconnect()
 		except Exception:
