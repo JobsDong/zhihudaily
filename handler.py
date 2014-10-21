@@ -7,8 +7,7 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 import datetime
 import hashlib
 import tornado.web
-import database
-import crawl
+import operation
 import config
 
 
@@ -24,6 +23,35 @@ class BaseHandler(tornado.web.RequestHandler):
 		                          reason=str(reason), exception=str(exception))
 
 
+class OperationHandler(BaseHandler):
+	"""clean data
+	"""
+
+	def get(self, *args, **kwargs):
+		secret = self.get_argument("secret", "")
+		m = hashlib.md5()
+		m.update(secret)
+		if m.hexdigest() != config.secret:
+			self.set_status(403)
+			self.write('{"code": 403, "msg": "secret wrong"}')
+		else:
+			path = self.request.path
+			print path
+			if path not in operation.operation_route.get_operation_routes():
+				self.set_status(404)
+				self.write('{"code": 404, "msg": "no operation"}')
+			else:
+				method = operation.operation_route.get_operation_routes()[path]
+				try:
+					method(self.request.arguments)
+				except Exception as e:
+					self.set_status(500)
+					self.write('{"code": 500, "msg": "%s"}' % str(e))
+				else:
+					self.set_status(200)
+					self.write('{"code": 200, "msg": "success"}')
+
+
 class CrawlHandler(BaseHandler):
 	"""用于执行采集任务
 	"""
@@ -37,9 +65,9 @@ class CrawlHandler(BaseHandler):
 		else:
 			date_str = self.get_argument("date", None)
 			if date_str:
-				crawl.fetch_before(date_str)
+				operation.fetch_before(date_str)
 			else:
-				crawl.fetch_latest()
+				operation.fetch_latest()
 			self.set_status(200)
 
 
@@ -48,16 +76,15 @@ class DayHandler(BaseHandler):
 	"""
 	def __init__(self, application, request, **kwargs):
 		super(DayHandler, self).__init__(application, request, **kwargs)
-		self._db = database.Dao()
 
 	def get(self, *args, **kwargs):
 		default_date_str = datetime.datetime.now().strftime("%Y%m%d")
 		date_str = self.get_argument("date", default_date_str)
-		news_list = self._db.select_news_list(date_str)
+		news_list = self.application.db.select_news_list(date_str)
 		# empty
 		if len(news_list) == 0 and date_str == default_date_str:
 			date_str = before_date_str(default_date_str)
-			news_list = self._db.select_news_list(date_str)
+			news_list = self.application.db.select_news_list(date_str)
 
 		self.render("day.html", now_date=now_date_str(date_str),
 		            before_date=before_date_str(date_str),
