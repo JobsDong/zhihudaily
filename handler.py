@@ -52,25 +52,6 @@ class OperationHandler(BaseHandler):
 					self.write('{"code": 200, "msg": "success"}')
 
 
-class CrawlHandler(BaseHandler):
-	"""用于执行采集任务
-	"""
-
-	def get(self, *args, **kwargs):
-		secret = self.get_argument("secret", "")
-		m = hashlib.md5()
-		m.update(secret)
-		if m.hexdigest() != config.secret:
-			self.set_status(403)
-		else:
-			date_str = self.get_argument("date", None)
-			if date_str:
-				operation.fetch_before(date_str)
-			else:
-				operation.fetch_latest()
-			self.set_status(200)
-
-
 class DayHandler(BaseHandler):
 	"""用于获取某一天的新闻
 	"""

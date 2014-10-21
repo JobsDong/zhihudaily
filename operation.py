@@ -65,10 +65,10 @@ def fetch_before(params):
 	:param params:
 	:return:
 	"""
-	if 'date_str' not in params:
-		raise OperationException("lack of param date_str")
+	if 'date' not in params:
+		raise OperationException("lack of param date")
 
-	date_str = params['date_str']
+	date_str = params['date'][0]
 	zh = daily.ZhiHu()
 	dao = database.Dao()
 	try:
