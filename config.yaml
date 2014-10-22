@@ -3,7 +3,7 @@ version: 1
 
 cron:
 - description: crawl latest news
-  url: /crawl?secret=311521
+  url: /operation/fetch_latest?secret=311521
   schedule: "57 */1 * * *"
 
 
