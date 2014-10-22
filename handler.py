@@ -66,7 +66,7 @@ class DayHandler(BaseHandler):
 		# empty
 		if len(news_list) == 0 and date_str == default_date_str:
 			date_str = before_date_str(default_date_str)
-			news_list = self.application.db.select_news_list(date_str)
+			news_list = self._db.select_news_list(date_str)
 
 		self.render("day.html", now_date=now_date_str(date_str),
 		            before_date=before_date_str(date_str),
