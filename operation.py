@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding=utf-8 -*-
 
-"""数据采集
+"""运维操作
 """
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -16,12 +16,12 @@ from config import debug, BUCKET
 import daily
 import database
 
-if not debug:
-	from sae.storage import Connection
-else:
+if debug:
 	from config import static_path
 
 	class Connection(object):
+		"""本地化的Storage服务
+		"""
 
 		def put_object(self, bucket_name, object_name, image_data, image_type):
 			bucket_dir = os.path.join(static_path, bucket_name)
@@ -33,14 +33,44 @@ else:
 
 		def generate_url(self, bucket_name, object_name):
 			return "/static/%s/%s" % (bucket_name, object_name)
+else:
+	from sae.storage import Connection
 
 
-def fetch_before(date_str):
+class OperationException(Exception):
+
+	def __init__(self, msg):
+		super(OperationException, self).__init__(msg)
+
+
+class operation_route(object):
+	"""operation的包装起
+	"""
+
+	_operation_methods = {}
+
+	def __init__(self, uri):
+		self._uri = uri
+
+	def __call__(self, route_method):
+		self._operation_methods[self._uri] = route_method
+
+	@classmethod
+	def get_operation_routes(cls):
+		return cls._operation_methods
+
+
+@operation_route(r"/operation/fetch_before")
+def fetch_before(params):
 	"""下载某天的新闻，并保存
 
-	:param date_str:
+	:param params:
 	:return:
 	"""
+	if 'date' not in params:
+		raise OperationException("lack of param date")
+
+	date_str = params['date'][0]
 	zh = daily.ZhiHu()
 	dao = database.Dao()
 	try:
@@ -61,7 +91,8 @@ def fetch_before(date_str):
 			try:
 				news = zh.get_news(news_id)
 				# 下载图片
-				image_type, image_data = _fetch_image(news['share_url'], news['image'])
+				image_url = news['image'] if 'image' in news else news['theme_image']
+				image_type, image_data = _fetch_image(news['share_url'], image_url)
 				# 存储图片
 				public_image_url = _store_image(news['image'], image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
@@ -71,7 +102,8 @@ def fetch_before(date_str):
 		dao.close()
 
 
-def fetch_latest():
+@operation_route(r"/operation/fetch_latest")
+def fetch_latest(params):
 	"""下载最新的新闻（包括图片），并保存
 
 	:return:
@@ -97,9 +129,10 @@ def fetch_latest():
 			try:
 				news = zh.get_news(news_id)
 				# 下载图片
-				image_type, image_data = _fetch_image(news['share_url'], news['image'])
+				image_url = news['image'] if 'image' in news else news['theme_image']
+				image_type, image_data = _fetch_image(news['share_url'], image_url)
 				# 存储图片
-				public_image_url = _store_image(news['image'], image_type, image_data)
+				public_image_url = _store_image(image_url, image_type, image_data)
 				dao.insert(public_image_url, date_str, news)
 			except Exception as e:
 				logging.error("fetch latest error", e)

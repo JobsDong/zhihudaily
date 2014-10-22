@@ -41,11 +41,11 @@
 
                 {% for news in news_list %}
                 <div class="col-md-4">
-                    <div href="{{ escape(news[2]) }}" class="feature">
+                    <div href="{{ escape(news[3]) }}" class="feature">
                         <div class="mask"></div>
-                        <img src="{{ escape(news[7]) }}">
-                        <a href="{{ escape(news[2]) }}">
-                            <h3>{{ escape(news[1]) }}</h3>
+                        <img src="{{ escape(news[8]) }}" alt="{{ escape(news[7]) }}">
+                        <a href="{{ escape(news[3]) }}">
+                            <h3>{{ escape(news[2]) }}</h3>
                         </a>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
             <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>
         </div>
 
-        <br><div class="txt">内容转载自 知乎日报 ，项目开源于<a href="https://github.com/JobsDong/zhihudaily">Github</a> </div>
+        <br><div class="txt">内容转载自<a href="http://daily.zhihu.com/">知乎日报</a>，项目开源于<a href="https://github.com/JobsDong/zhihudaily">Github</a> </div>
     </div>
 
 </body>

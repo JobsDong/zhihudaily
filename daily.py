@@ -52,7 +52,6 @@ class ZhiHu(object):
 
 		return msg
 
-
 	def _do_http_request(self, url):
 		http, content, msg, error, status = None, None, None, None, None
 		try:

@@ -7,9 +7,9 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 import datetime
 import hashlib
 import tornado.web
-import database
-import crawl
+import operation
 import config
+import database
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -24,8 +24,8 @@ class BaseHandler(tornado.web.RequestHandler):
 		                          reason=str(reason), exception=str(exception))
 
 
-class CrawlHandler(BaseHandler):
-	"""用于执行采集任务
+class OperationHandler(BaseHandler):
+	"""clean data
 	"""
 
 	def get(self, *args, **kwargs):
@@ -34,13 +34,22 @@ class CrawlHandler(BaseHandler):
 		m.update(secret)
 		if m.hexdigest() != config.secret:
 			self.set_status(403)
+			self.write('{"code": 403, "msg": "secret wrong"}')
 		else:
-			date_str = self.get_argument("date", None)
-			if date_str:
-				crawl.fetch_before(date_str)
+			path = self.request.path
+			if path not in operation.operation_route.get_operation_routes():
+				self.set_status(404)
+				self.write('{"code": 404, "msg": "no operation"}')
 			else:
-				crawl.fetch_latest()
-			self.set_status(200)
+				method = operation.operation_route.get_operation_routes()[path]
+				try:
+					method(self.request.arguments)
+				except Exception as e:
+					self.set_status(500)
+					self.write('{"code": 500, "msg": "%s"}' % str(e))
+				else:
+					self.set_status(200)
+					self.write('{"code": 200, "msg": "success"}')
 
 
 class DayHandler(BaseHandler):
@@ -57,7 +66,7 @@ class DayHandler(BaseHandler):
 		# empty
 		if len(news_list) == 0 and date_str == default_date_str:
 			date_str = before_date_str(default_date_str)
-			news_list = self._db.select_news_list(date_str)
+			news_list = self.application.db.select_news_list(date_str)
 
 		self.render("day.html", now_date=now_date_str(date_str),
 		            before_date=before_date_str(date_str),
