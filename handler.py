@@ -9,6 +9,7 @@ import hashlib
 import tornado.web
 import operation
 import config
+import database
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -36,7 +37,6 @@ class OperationHandler(BaseHandler):
 			self.write('{"code": 403, "msg": "secret wrong"}')
 		else:
 			path = self.request.path
-			print path
 			if path not in operation.operation_route.get_operation_routes():
 				self.set_status(404)
 				self.write('{"code": 404, "msg": "no operation"}')
@@ -57,11 +57,12 @@ class DayHandler(BaseHandler):
 	"""
 	def __init__(self, application, request, **kwargs):
 		super(DayHandler, self).__init__(application, request, **kwargs)
+		self._db = database.Dao()
 
 	def get(self, *args, **kwargs):
 		default_date_str = datetime.datetime.now().strftime("%Y%m%d")
 		date_str = self.get_argument("date", default_date_str)
-		news_list = self.application.db.select_news_list(date_str)
+		news_list = self._db.select_news_list(date_str)
 		# empty
 		if len(news_list) == 0 and date_str == default_date_str:
 			date_str = before_date_str(default_date_str)

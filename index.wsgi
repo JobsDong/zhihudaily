@@ -15,7 +15,6 @@ else:
 	define("port", default=8080, help="run on the given port", type=int)
 
 import tornado.wsgi
-import database
 import handler
 
 
@@ -34,7 +33,6 @@ class Application(tornado.wsgi.WSGIApplication):
 			"debug": debug,
 		}
 
-		self.db = database.Dao()
 		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
 
 

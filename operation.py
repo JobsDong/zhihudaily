@@ -20,6 +20,8 @@ if debug:
 	from config import static_path
 
 	class Connection(object):
+		"""本地化的Storage服务
+		"""
 
 		def put_object(self, bucket_name, object_name, image_data, image_type):
 			bucket_dir = os.path.join(static_path, bucket_name)
