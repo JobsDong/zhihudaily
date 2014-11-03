@@ -162,9 +162,20 @@ a.page-btn {
     display: inline-block;
     height: 60px;
     line-height: 60px;
-    width: 280px;
+    width: 140px;
     border: 1px solid #b8b8b8;
-    background-color: #fdfdfd;
+    background-color: #F0FFFF;
+    font-size: 17px;
+    border-radius: 10px;
+    color: #444;
+}
+div.page-btn {
+    display: inline-block;
+    height: 60px;
+    line-height: 60px;
+    width: 140px;
+    border: 1px solid #D3D3D3;
+    background-color: #F5F5F5;
     font-size: 17px;
     border-radius: 10px;
     color: #444;

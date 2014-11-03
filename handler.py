@@ -68,8 +68,12 @@ class DayHandler(BaseHandler):
 			date_str = before_date_str(default_date_str)
 			news_list = self._db.select_news_list(date_str)
 
+		after_date = None if date_str == default_date_str \
+			else after_date_str(date_str)
+
 		self.render("day.html", now_date=now_date_str(date_str),
 		            before_date=before_date_str(date_str),
+		            after_date=after_date,
 		            news_list=news_list)
 
 
@@ -91,6 +95,15 @@ def before_date_str(date_str):
 	before_date = now_date - datetime.timedelta(days=1)
 	return before_date.strftime("%Y%m%d")
 
+def after_date_str(date_str):
+	"""计算后一天的date_str
+
+	:param date_str:
+	:return:
+	"""
+	now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+	before_date = now_date + datetime.timedelta(days=1)
+	return before_date.strftime("%Y%m%d")
 
 def now_date_str(date_str):
 	if datetime.datetime.now().strftime("%Y%m%d") == date_str:

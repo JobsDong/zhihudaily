@@ -339,7 +339,7 @@ a.page-btn {
     display: inline-block;
     height: 60px;
     line-height: 60px;
-    width: 280px;
+    width: 140px;
     border: 1px solid #b8b8b8;
     background-color: #fdfdfd;
     font-size: 17px;
@@ -446,7 +446,13 @@ html.no-touch .footer a:hover {
     a.page-btn {
         height: 40px;
         line-height: 40px;
-        width: 250px;
+        width: 125px;
+        font-size: 15px;
+    }
+    d.page-btn {
+        height: 40px;
+        line-height: 40px;
+        width: 125px;
         font-size: 15px;
     }
     .view-more {

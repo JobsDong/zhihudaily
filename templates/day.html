@@ -58,6 +58,11 @@
 
     <div class="footer">
         <div class="f">
+            {% if after_date is None %}
+            <div class="page-btn">没有了</div>
+            {% else %}
+            <a target="_self" href="/?date={{escape(after_date)}}" class="page-btn">后一天</a>
+            {% end %}
             <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>
         </div>
 
