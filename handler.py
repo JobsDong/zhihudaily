@@ -81,16 +81,16 @@ class DayHandler(BaseHandler):
 
 
 class SearchHandler(BaseHandler):
-	"""处理搜索
-	"""
-	def __init__(self, application, request, **kwargs):
-		super(SearchHandler, self).__init__(application, request, **kwargs)
-		self._fts = search.FTS()
+    """处理搜索
+    """
+    def __init__(self, application, request, **kwargs):
+        super(SearchHandler, self).__init__(application, request, **kwargs)
+        self._fts = search.FTS()
 
-	def get(self, *args, **kwargs):
-		keywords = self.get_argument("keywords")
-		results = self._fts.search(keywords, limit=10)
-		self.render("search.html", results=results)
+    def get(self, *args, **kwargs):
+        keywords = self.get_argument("keywords")
+        results = self._fts.search(keywords, limit=10)
+        self.render("search.html", results=results)
 
 
 class ErrorHandler(BaseHandler):

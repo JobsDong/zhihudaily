@@ -16,7 +16,6 @@ import httplib
 from config import debug, BUCKET, image_dir
 import daily
 import database
-import search
 
 if debug:
     def generate_url(object_name):
@@ -54,16 +53,16 @@ class operation_route(object):
     def get_operation_routes(cls):
         return cls._operation_methods
 
-@operation_route(r"/operation/create_index"):
+@operation_route(r"/operation/create_index")
 def create_index(params):
-	"""重建索引
-	"""
-	# 删除索引文件
-	index_path = os.path.join()
-	shutil.rmtree()
+    """重建索引
+    """
+    # 删除索引文件
+    index_path = os.path.join()
+    shutil.rmtree()
 
 
-	# 重建索引
+    # 重建索引
 
 
 
@@ -184,6 +183,7 @@ def _store_image(image_url, image_type, image_data):
               "wb") as object_file:
         object_file.write(image_data)
     return generate_url(object_name)
+
 
 def _extract_news_ids(latest_news):
     """提取出最新的news_ids
