@@ -30,7 +30,7 @@
             <div class="row">
                 <div class="col-md-8 col-md-offset-3">
                     <div class="input-group">
-                        <input type="search" class="form-control input-lg" placeholder="search">
+                        <input type="search" class="form-control input-lg" placeholder="{{ escape(keywords) }}">
                         <span class="input-group-btn">
                             <button class="btn btn-lg btn-default" type="button">Go!</button>
                         </span>
@@ -38,54 +38,22 @@
                 </div>
             </div>
 
+            {% for hit in hits%}
+
             <div class="row item">
                 <div class="col-md-3 col-md-offset-1">
-                    <img>
+                    <img src="{{ escape(hit['image_public_url']) }}">
                 </div>
                 <div class="col-md-8">
                     <div class="row">
-                        <div class="col-md-10 title text-left">标题标题标题题</div>
-                        <div class="col-md-2 date text-right">2014-01-01</div>
+                        <div class="col-md-10 title text-left">{{ escape(str(hit['title'])) }}</div>
+                        <div class="col-md-2 date text-right">{{ escape(hit['date']) }}</div>
                     </div>
 
-                    <div class="summary">摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘
-                        要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    </div>
+                    <div class="summary">{% raw hit['summary'] %}</div>
                 </div>
             </div>
-
-            <div class="row item">
-                <div class="col-md-3 col-md-offset-1">
-                    <img>
-                </div>
-                <div class="col-md-8">
-                    <div class="title">标题标题标题题</div>
-                    <div class="date">2014-01-01</div>
-                    <div class="summary">摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘
-                        要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    </div>
-                </div>
-            </div>
-
-            <div class="row item">
-                <div class="col-md-3 col-md-offset-1">
-                    <img>
-                </div>
-                <div class="col-md-8">
-                    <div class="title">标题标题标题题</div>
-                    <div class="date">2014-01-01</div>
-                    <div class="summary">摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘
-                        要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要
-                    </div>
-                </div>
-            </div>
-
+            {% end %}
         </div>
     </div>
 
