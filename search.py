@@ -16,7 +16,7 @@ class FTS(object):
 
     def __init__(self, index_path):
         analyzer = ChineseAnalyzer()
-        schema = Schema(path=ID(unique=True, stored=True),
+        schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(analyzer=analyzer),
                         content=TEXT(analyzer=analyzer))
         if exists_in(index_path):
@@ -24,16 +24,17 @@ class FTS(object):
         else:
             self._ix = create_in(index_path, schema=schema)
         self._parser = MultifieldParser(["title", "content"], self._ix.schema)
+        self._searcher = self._ix.searcher()
 
     def search(self, query_string, limit=10):
         """搜索文件
         """
-        # convert to unicode
+        # refresh searcher
+        self._searcher = self._searcher.refresh()
         query_string = str2unicode(query_string)
 
-        with self._ix.searcher() as s:
-            query = self._parser.parse(query_string)
-            search_results = s.search(query, limit=limit)
+        query = self._parser.parse(query_string)
+        search_results = self._searcher.search(query, limit=limit)
 
         return search_results
 
@@ -58,6 +59,10 @@ class FTS(object):
                                     content=str2unicode(doc['content']))
         writer.commit(optimize=True, merge=True)
 
+    def close(self):
+        self._searcher.close()
+
 
 def str2unicode(text):
     return text.decode('utf-8') if isinstance(text, str) else text
+
