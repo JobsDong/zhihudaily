@@ -5,6 +5,7 @@
 """
 
 import time
+import collections
 import MySQLdb
 import logging
 
@@ -94,6 +95,20 @@ class Dao(object):
         cursor = self._cursor()
         try:
             cursor.execute("DELETE FROM news WHERE date<=%s", [date_str])
+        finally:
+            cursor.close()
+
+    def get_news(self, news_id):
+        """根据news_id获取news的信息
+
+        :param news_id:
+        :return:
+        """
+        cursor = self._cursor()
+        try:
+            cursor.execute("SELECT * FROM news WHERE news_id=%s", [news_id])
+            news = cursor.fetchOne()
+            return news
         finally:
             cursor.close()
 
