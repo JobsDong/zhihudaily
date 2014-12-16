@@ -77,3 +77,10 @@ SAE环境搭建
 	"http://localhost:{port}/operation/fetch_latest?date=20140808&secret={secret}
 
 3. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
+
+4. TODO::
+
+    1. 性能优化
+    2. 搜索功能 (进行中)
+    3. 非引用zhihu.com ?
+    4. 测试
