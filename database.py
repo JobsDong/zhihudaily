@@ -17,7 +17,7 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 def decode(value):
     if isinstance(value, unicode):
         value = value.encode('utf8')
-
+    print type(value), value
     return value
 
 
@@ -107,7 +107,7 @@ class Dao(object):
         cursor = self._cursor()
         try:
             cursor.execute("SELECT * FROM news WHERE news_id=%s", [news_id])
-            news = cursor.fetchOne()
+            news = cursor.fetchone()
             return news
         finally:
             cursor.close()
