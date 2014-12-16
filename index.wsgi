@@ -20,12 +20,13 @@ import handler
 
 class Application(tornado.wsgi.WSGIApplication):
 
-    def __init__(self):
-        handlers = [
-            (r'/', handler.DayHandler),
-            (r'/operation/(.*)', handler.OperationHandler),
-            (r'/.*', handler.ErrorHandler),
-        ]
+	def __init__(self):
+		handlers = [
+			(r'/', handler.DayHandler),
+			(r'/search', handler.SearchHandler),
+			(r'/operation/(.*)', handler.OperationHandler),
+			(r'/.*', handler.ErrorHandler),
+		]
 
         settings = {
             "static_path": static_path,
