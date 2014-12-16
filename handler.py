@@ -80,17 +80,29 @@ class DayHandler(BaseHandler):
                     news_list=news_list)
 
 
+# TODO test
 class SearchHandler(BaseHandler):
     """处理搜索
     """
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
-        self._fts = search.FTS()
+        self._fts = search.FTS(config.index_path)
+        self._db = database.Dao()
 
     def get(self, *args, **kwargs):
         keywords = self.get_argument("keywords")
+        # search
+        hits = []
         results = self._fts.search(keywords, limit=10)
-        self.render("search.html", results=results)
+        for hit in results:
+            news = self._db.get_news(hit['news_id'])
+            hits.append(dict(
+                share_url=news['share_url'],
+                title=hit.highlights('title', text=news['title']),
+                summary=hit.highlights('content', text=news['body']),
+            ))
+
+        self.render("search.html", hits=hits)
 
 
 class ErrorHandler(BaseHandler):
@@ -111,6 +123,7 @@ def before_date_str(date_str):
     before_date = now_date - datetime.timedelta(days=1)
     return before_date.strftime("%Y%m%d")
 
+
 def after_date_str(date_str):
     """计算后一天的date_str
 
@@ -120,6 +133,7 @@ def after_date_str(date_str):
     now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
     before_date = now_date + datetime.timedelta(days=1)
     return before_date.strftime("%Y%m%d")
+
 
 def now_date_str(date_str):
     if datetime.datetime.now().strftime("%Y%m%d") == date_str:
