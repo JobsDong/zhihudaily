@@ -7,17 +7,17 @@
 
 .item img {
     display: block;
-    width: 190px;
-    height: 180px;
+    width: 180px;
+    height: 170px;
 }
 
 .item .title {
-    font-size: 26px;
+    font-size: 20px;
     height: 1.65;
 }
 
 .item .date {
-    font-size: 15px;
+    font-size: 17px;
     height: 1.65;
 }
 
