@@ -23,6 +23,7 @@ class Application(tornado.wsgi.WSGIApplication):
 	def __init__(self):
 		handlers = [
 			(r'/', handler.DayHandler),
+			(r'/search', handler.SearchHandler),
 			(r'/operation/(.*)', handler.OperationHandler),
 			(r'/.*', handler.ErrorHandler),
 		]

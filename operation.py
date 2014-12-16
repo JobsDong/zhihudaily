@@ -7,7 +7,6 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import os
-import shutil
 import logging
 import urlparse
 import hashlib
@@ -17,6 +16,8 @@ from config import debug, BUCKET
 import daily
 import database
 import search
+import util
+
 
 if debug:
     from config import static_path
@@ -61,18 +62,6 @@ class operation_route(object):
     def get_operation_routes(cls):
         return cls._operation_methods
 
-@operation_route(r"/operation/create_index")
-def create_index(params):
-    """重建索引
-    """
-    # 删除索引文件
-    index_path = os.path.join()
-    shutil.rmtree()
-
-
-    # 重建索引
-
-
 
 @operation_route(r"/operation/fetch_before")
 def fetch_before(params):
@@ -87,6 +76,7 @@ def fetch_before(params):
     date_str = params['date'][0]
     zh = daily.ZhiHu()
     dao = database.Dao()
+    fts = search.FTS()
     try:
         # 获取最新的news_id列表
         latest_news = zh.get_before_news(date_str)
@@ -110,13 +100,17 @@ def fetch_before(params):
                 # 存储图片
                 public_image_url = _store_image(news['image'], image_type, image_data)
                 dao.insert(public_image_url, date_str, news)
+                # 创建索引
+                body_text = util.extract_text(news.get('body', ''))
+                fts.add_doc(news['id'], news['title'], body_text)
             except Exception as e:
                 logging.error("fetch before error", e)
     finally:
         dao.close()
+        fts.close()
 
 
-@operation_route(r"/operation/fetch_latest")
+# @operation_route(r"/operation/fetch_latest")
 def fetch_latest(params):
     """下载最新的新闻（包括图片），并保存
 
@@ -124,6 +118,7 @@ def fetch_latest(params):
     """
     zh = daily.ZhiHu()
     dao = database.Dao()
+    fts = search.FTS()
 
     try:
         # 获取最新的news_id列表
@@ -148,10 +143,13 @@ def fetch_latest(params):
                 # 存储图片
                 public_image_url = _store_image(image_url, image_type, image_data)
                 dao.insert(public_image_url, date_str, news)
+                # 创建索引
+                body_text = util.extract_text(news.get('body', ''))
+                fts.add_doc(str(news['id']), news['title'], body_text)
             except Exception as e:
                 logging.error("fetch latest error", e)
-
     finally:
+        fts.close()
         dao.close()
 
 
@@ -214,4 +212,4 @@ def _extract_date_str(latest_news):
 
 
 if __name__ == "__main__":
-    fetch_latest()
+    fetch_latest(None)

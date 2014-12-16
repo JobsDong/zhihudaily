@@ -11,6 +11,7 @@ import operation
 import config
 import database
 import search
+import util
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -86,7 +87,7 @@ class SearchHandler(BaseHandler):
     """
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
-        self._fts = search.FTS(config.index_path)
+        self._fts = search.FTS()
         self._db = database.Dao()
 
     def get(self, *args, **kwargs):
@@ -94,15 +95,20 @@ class SearchHandler(BaseHandler):
         # search
         hits = []
         results = self._fts.search(keywords, limit=10)
+
         for hit in results:
             news = self._db.get_news(hit['news_id'])
+            text = util.extract_text(news[5])
+            summary = "...%s..." % hit.highlights('content', text=text, top=3)
             hits.append(dict(
-                share_url=news['share_url'],
-                title=hit.highlights('title', text=news['title']),
-                summary=hit.highlights('content', text=news['body']),
+                image_public_url=news[8],
+                share_url=news[3],
+                date=news[4],
+                title=news[2],
+                summary=summary,
             ))
 
-        self.render("search.html", hits=hits)
+        self.render("search.html", hits=hits, keywords=keywords)
 
 
 class ErrorHandler(BaseHandler):
