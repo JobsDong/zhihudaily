@@ -14,6 +14,9 @@ static_path = os.path.join(os.path.dirname(__file__), "static")
 # template path
 template_path = os.path.join(os.path.dirname(__file__), "templates")
 
+# index path
+index_path = os.path.join(os.path.dirname(__file__), "index")
+
 # 图片存储的bucket name
 BUCKET = "dailyimage"
 

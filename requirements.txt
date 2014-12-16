@@ -1,2 +1,4 @@
 tornado==3.0.0
+whoosh==2.6.0
 mysql-python
+jieba==0.34

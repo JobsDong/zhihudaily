@@ -7,6 +7,7 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import os
+import shutil
 import logging
 import urlparse
 import hashlib
@@ -15,6 +16,7 @@ import httplib
 from config import debug, BUCKET
 import daily
 import database
+import search
 
 if debug:
 	from config import static_path
@@ -58,6 +60,18 @@ class operation_route(object):
 	@classmethod
 	def get_operation_routes(cls):
 		return cls._operation_methods
+
+@operation_route(r"/operation/create_index"):
+def create_index(params):
+	"""重建索引
+	"""
+	# 删除索引文件
+	index_path = os.path.join()
+	shutil.rmtree()
+
+
+	# 重建索引
+
 
 
 @operation_route(r"/operation/fetch_before")
