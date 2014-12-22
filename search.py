@@ -36,8 +36,8 @@ class FTS(object):
     def __init__(self):
         index_path = config.index_path
         analyzer = ChineseAnalyzer()
-        self._fragmenter_maxchars = 80
-        self._fragmenter_surround = 80
+        self._fragmenter_maxchars = 70
+        self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(analyzer=analyzer),

@@ -14,7 +14,7 @@
 }
 
 .item:hover {
-    outline: solid 2px #33a9d8;
+    outline: solid 1px #33a9d8;
 }
 
 .item img {
@@ -40,4 +40,9 @@
 .item .summary {
     margin-top: 20px;
     font-size: 15px;
+}
+
+.item a {
+    text-decoration: none;
+    color: #000000;
 }
