@@ -1,35 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <title>{{escape(code)}}</title>
-    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.0.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../static/css/day.css">
-    <base target="_self">
-</head>
+{% extends "base.html" %}
 
-<body class="home">
+{% block title %}
+<title>{{ escape(code) }}}</title>
+{% end %}
 
-    <div class="header navbar-fixed-top">
-        <div class="container-fixed-width clearfix">
-            <h1 class="logo">
-                <a href="/" title="知乎" class="link-logo" target="_self"></a>
-            </h1>
+{% block css %}
+{% end %}
 
-            <div class="link">
-                <a href="/" class="button">专题</a>
-                <a href="/" title="搜索" class="link-search"><i class="ico"></i></a>
-                <a href="" title="订阅RSS" class="link-rss"><i class="ico"></i></a>
-            </div>
-        </div>
-    </div>
-
-    <center><h2>{{escape(code)}} {{escape(reason)}}.</h2></center>
-    <hr><center>{{escape(exception)}}</center>
-    <hr><center>知乎日报</center>
-
-    <div class="footer">
-        <br><div class="txt">内容转载自 知乎日报 ，项目开源于Github </div>
-    </div>
-
-</body>
-</html>
+{% block content %}
+<center><h2>{{escape(code)}} {{escape(reason)}}.</h2></center>
+<hr><center>{{escape(exception)}}</center>
+<hr><center>知乎日报</center>
+{% end %}
