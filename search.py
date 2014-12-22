@@ -7,6 +7,7 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 from whoosh.index import open_dir, create_in, exists_in
+from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import MultifieldParser
 from whoosh import highlight
@@ -75,6 +76,10 @@ class FTS(object):
         writer.add_document(news_id=news_id, title=title,
                             content=content)
         writer.commit(optimize=True, merge=True)
+
+    def clear(self):
+        writer = self._ix.writer()
+        writer.commit(mergetype=writing.CLEAR)
 
     def close(self):
         self._searcher.close()
