@@ -24,14 +24,19 @@ class MarkFormatter(highlight.Formatter):
 
         return "<mark>%s</mark>" % token_text
 
+    def format(self, fragments, replace=False):
+        formatted = [self.format_fragment(f, replace=replace)
+                     for f in fragments]
+        return "<br>".join(formatted)
+
 
 class FTS(object):
 
     def __init__(self):
         index_path = config.index_path
         analyzer = ChineseAnalyzer()
-        self._fragmenter_maxchars = 100
-        self._fragmenter_surround = 100
+        self._fragmenter_maxchars = 80
+        self._fragmenter_surround = 80
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(analyzer=analyzer),

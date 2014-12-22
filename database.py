@@ -5,7 +5,6 @@
 """
 
 import time
-import collections
 import MySQLdb
 import logging
 
@@ -17,7 +16,6 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 def decode(value):
     if isinstance(value, unicode):
         value = value.encode('utf8')
-    print type(value), value
     return value
 
 

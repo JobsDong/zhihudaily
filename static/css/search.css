@@ -1,26 +1,43 @@
-.item {
-    height: 190px;
+.nors {
+    height: 215px;
     position: relative;
-    margin-top: 40px;
+    margin-top: 10px;
+    overflow: hidden;
+    font-size: 20px;
+}
+
+.item {
+    height: 215px;
+    position: relative;
+    margin-top: 10px;
     overflow: hidden;
 }
 
+.item:hover {
+    outline: solid 2px #33a9d8;
+}
+
 .item img {
+    position: absolute;
+    left: 0;
     display: block;
-    width: 180px;
-    height: 170px;
+    width: 230px;
+    height: 215px;
 }
 
 .item .title {
-    font-size: 20px;
-    height: 1.65;
+    font-size: 23px;
+    word-wrap: break-word;
+    height: 1.85;
 }
 
 .item .date {
-    font-size: 17px;
-    height: 1.65;
+    font-size: 20px;
+    vertical-align: middle;
+    height: 1.75;
 }
 
 .item .summary {
-    margin-top: 15px;
+    margin-top: 20px;
+    font-size: 15px;
 }
