@@ -10,3 +10,6 @@ cron:
 libraries:
 - name: "tornado"
   version: "3.0.0"
+
+- name: "lxml"
+  version: "3.0.0"
