@@ -7,7 +7,7 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import os
-import logging
+from tornado.log import app_log
 import urlparse
 import hashlib
 import httplib
@@ -96,7 +96,7 @@ def fetch_before(params):
                 body_text = util.extract_text(news.get('body', ''))
                 fts.add_doc(str(news['id']), news['title'], body_text)
             except Exception as e:
-                logging.error("fetch before error", e)
+                app_log.error("fetch before error", e)
     finally:
         dao.close()
         fts.close()
@@ -139,8 +139,33 @@ def fetch_latest(params):
                 body_text = util.extract_text(news.get('body', ''))
                 fts.add_doc(str(news['id']), news['title'], body_text)
             except Exception as e:
-                logging.error("fetch latest error", e)
+                app_log.error("fetch latest error", e)
+    finally:
+        fts.close()
+        dao.close()
 
+@operation_route(r"/operation/recreate_index")
+def recreate_index(params):
+    """重建索引
+
+    :param params:
+    :return:
+    """
+    dao = database.Dao()
+    fts = search.FTS()
+    try:
+        # clearing index
+        fts.clear()
+
+        # create
+        for news in dao.all_news_list():
+            try:
+                news_id = news[1]
+                news_title = news[2]
+                body_text = util.extract_text(news[5])
+                fts.add_doc(str(news_id), news_title, body_text)
+            except Exception as e:
+                app_log.error("index error", e)
     finally:
         fts.close()
         dao.close()

@@ -84,6 +84,19 @@ class Dao(object):
         finally:
             cursor.close()
 
+    def all_news_list(self):
+        """获取所有的news
+
+        :return:
+        """
+        cursor = self._cursor()
+        try:
+            cursor.execute("SELECT * FROM news")
+            news = cursor.fetchall()
+            return news
+        finally:
+            cursor.close()
+
     def clean_news_list(self, date_str):
         """删除date_str之前的所有数据
 
