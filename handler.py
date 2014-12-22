@@ -81,7 +81,6 @@ class DayHandler(BaseHandler):
                     news_list=news_list)
 
 
-# TODO test
 class SearchHandler(BaseHandler):
     """处理搜索
     """
@@ -99,7 +98,7 @@ class SearchHandler(BaseHandler):
         for hit in results:
             news = self._db.get_news(hit['news_id'])
             text = util.extract_text(news[5])
-            summary = "...%s..." % hit.highlights('content', text=text, top=3)
+            summary = hit.highlights('content', text=text, top=2)
             hits.append(dict(
                 image_public_url=news[8],
                 share_url=news[3],

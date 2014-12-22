@@ -102,7 +102,7 @@ def fetch_before(params):
                 dao.insert(public_image_url, date_str, news)
                 # 创建索引
                 body_text = util.extract_text(news.get('body', ''))
-                fts.add_doc(news['id'], news['title'], body_text)
+                fts.add_doc(str(news['id']), news['title'], body_text)
             except Exception as e:
                 logging.error("fetch before error", e)
     finally:
@@ -110,7 +110,7 @@ def fetch_before(params):
         fts.close()
 
 
-# @operation_route(r"/operation/fetch_latest")
+@operation_route(r"/operation/fetch_latest")
 def fetch_latest(params):
     """下载最新的新闻（包括图片），并保存
 

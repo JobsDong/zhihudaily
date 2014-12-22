@@ -18,27 +18,28 @@
             <h1 class="logo">
                 <a href="/" title="知乎" class="link-logo" target="_self"></a>
             </h1>
-
-            <div class="link">
-                <a href="" class="button">专题</a>
-                <a href="" title="搜索" class="link-search"><i class="ico"></i></a>
-                <a href="" title="订阅RSS" class="link-rss"><i class="ico"></i></a>
-            </div>
         </div>
     </div>
 
     <div class="main-content">
         <div class="container-fixed-width">
-            <div style="margin-top: 47px;" class="row">
-                <div class="col-6">
-                    <h2 class="section-title">
-                        {{escape(now_date)}}
-                    </h2>
+
+            <div style="margin-top: 40px;" class="row"></div>
+            <!-- search button-->
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <form action="/search" method="get" target="_self">
+                        <div class="input-group">
+                            <input type="search" name="keywords" class="form-control input-lg" placeholder="search">
+                            <span class="input-group-btn">
+                                <button class="btn btn-lg btn-default" type="submit">Go!</button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
 
             <div class="row features">
-
                 {% for news in news_list %}
                 <div class="col-md-4">
                     <div href="{{ escape(news[3]) }}" class="feature">
@@ -50,7 +51,6 @@
                     </div>
                 </div>
                 {% end %}
-
             </div>
 
         </div>
@@ -58,9 +58,7 @@
 
     <div class="footer">
         <div class="f">
-            {% if after_date is None %}
-            <div class="page-btn">没有了</div>
-            {% else %}
+            {% if after_date is not None %}
             <a target="_self" href="/?date={{escape(after_date)}}" class="page-btn">后一天</a>
             {% end %}
             <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>

@@ -25,34 +25,44 @@
     <div class="main-content">
         <div class="container-fixed-width">
             <!-- whitespace -->
-            <div style="margin-top: 80px;" class="row"></div>
+            <div style="margin-top: 40px;" class="row"></div>
             <!-- search button-->
             <div class="row">
-                <div class="col-md-8 col-md-offset-3">
-                    <div class="input-group">
-                        <input type="search" class="form-control input-lg" placeholder="{{ escape(keywords) }}">
-                        <span class="input-group-btn">
-                            <button class="btn btn-lg btn-default" type="button">Go!</button>
-                        </span>
-                    </div>
+                <div class="col-md-10 col-md-offset-1">
+                    <form target="_self" method="get" action="/search">
+                        <div class="input-group">
+                            <input type="search" name="keywords" class="form-control input-lg" placeholder="{{keywords}}">
+                            <span class="input-group-btn">
+                                <button class="btn btn-lg btn-default" type="submit">Go!</button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            {% for hit in hits%}
+            <div style="margin-top: 40px;" class="row"></div>
 
+            {% if len(hits) == 0 %}
+            <div class="row nors">
+                <div class="col-md-6 col-md-offset-3">很抱歉，没有找到与“{{ escape(keywords)}}”相关的网页。</div>
+            </div>
+            {% else %}
+            {% for hit in hits%}
             <div class="row item">
-                <div class="col-md-3 col-md-offset-1">
+                <div class="col-md-3">
                     <img src="{{ escape(hit['image_public_url']) }}">
                 </div>
-                <div class="col-md-8">
+
+                <div class="col-md-9">
                     <div class="row">
                         <div class="col-md-10 title text-left">{{ escape(str(hit['title'])) }}</div>
-                        <div class="col-md-2 date text-right">{{ escape(hit['date']) }}</div>
+                        <div class="col-md-2 date text-right">{{ escape(hit['date'])}}</div>
                     </div>
 
                     <div class="summary">{% raw hit['summary'] %}</div>
                 </div>
             </div>
+            {% end %}
             {% end %}
         </div>
     </div>
