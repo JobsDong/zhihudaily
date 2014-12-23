@@ -19,17 +19,24 @@ import search
 import util
 
 if debug:
-    def generate_url(object_name):
-        return "%s/%s" % (image_dir, object_name)
+    from config import static_path
+
+    class Connection(object):
+        """本地化的Storage服务
+        """
+
+        def put_object(self, bucket_name, object_name, image_data, image_type):
+            bucket_dir = os.path.join(static_path, bucket_name)
+            if not os.path.exists(bucket_dir):
+                os.mkdir(bucket_dir)
+            with open(os.path.join(bucket_dir, object_name),
+                      "wb") as object_file:
+                object_file.write(image_data)
+
+        def generate_url(self, bucket_name, object_name):
+            return "/static/%s/%s" % (bucket_name, object_name)
 else:
-    from sae.ext.storage import monkey
-    monkey.patch_all()
-
     from sae.storage import Connection
-
-    def generate_url(object_name):
-        bucket = Connection().get_bucket(BUCKET)
-        return bucket.generate_url(object_name)
 
 
 class OperationException(Exception):
