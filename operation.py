@@ -12,29 +12,22 @@ import urlparse
 import hashlib
 import httplib
 
-from config import debug, BUCKET
+from config import debug, BUCKET, image_dir
 import daily
 import database
 
 if debug:
-    from config import static_path
-
-    class Connection(object):
-        """本地化的Storage服务
-        """
-
-        def put_object(self, bucket_name, object_name, image_data, image_type):
-            bucket_dir = os.path.join(static_path, bucket_name)
-            if not os.path.exists(bucket_dir):
-                os.mkdir(bucket_dir)
-            with open(os.path.join(bucket_dir, object_name),
-                      "wb") as object_file:
-                object_file.write(image_data)
-
-        def generate_url(self, bucket_name, object_name):
-            return "/static/%s/%s" % (bucket_name, object_name)
+    def generate_url(object_name):
+        return "%s/%s" % (image_dir, object_name)
 else:
+    from sae.ext.storage import monkey
+    monkey.patch_all()
+
     from sae.storage import Connection
+
+    def generate_url(object_name):
+        bucket = Connection().get_bucket(BUCKET)
+        return bucket.generate_url(object_name)
 
 
 class OperationException(Exception):
@@ -165,15 +158,18 @@ def _store_image(image_url, image_type, image_data):
     :param image_data:
     :return:
     """
-    con = Connection()
-
+    # object name
     m = hashlib.md5()
     m.update(image_url)
     object_name = m.hexdigest()
-    con.put_object(BUCKET, object_name, image_data, image_type)
 
-    return con.generate_url(BUCKET, object_name)
+    if not os.path.exists(image_dir):
+        os.mkdir(image_dir)
 
+    with open(os.path.join(image_dir, object_name),
+              "wb") as object_file:
+        object_file.write(image_data)
+    return generate_url(object_name)
 
 def _extract_news_ids(latest_news):
     """提取出最新的news_ids

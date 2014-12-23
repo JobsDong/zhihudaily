@@ -26,6 +26,7 @@ if debug:
     DB_USER = "root"
     DB_PASS = "root"
     DB_PORT = 3306
+    image_dir = os.path.join("static", "dailyimage")
 else:
     import sae.const
 
@@ -35,3 +36,4 @@ else:
     DB_USER = sae.const.MYSQL_USER
     DB_PASS = sae.const.MYSQL_PASS
     DB_PORT = int(sae.const.MYSQL_PORT)
+    image_dir = "/s/%s" % BUCKET
