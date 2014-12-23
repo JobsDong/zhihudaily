@@ -9,10 +9,10 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 from config import debug, static_path, template_path
 
 if not debug:
-	import sae
+    import sae
 else:
-	from tornado.options import define, options
-	define("port", default=8080, help="run on the given port", type=int)
+    from tornado.options import define, options
+    define("port", default=8080, help="run on the given port", type=int)
 
 import tornado.wsgi
 import handler
@@ -20,31 +20,31 @@ import handler
 
 class Application(tornado.wsgi.WSGIApplication):
 
-	def __init__(self):
-		handlers = [
-			(r'/', handler.DayHandler),
-			(r'/operation/(.*)', handler.OperationHandler),
-			(r'/.*', handler.ErrorHandler),
-		]
+    def __init__(self):
+        handlers = [
+            (r'/', handler.DayHandler),
+            (r'/operation/(.*)', handler.OperationHandler),
+            (r'/.*', handler.ErrorHandler),
+        ]
 
-		settings = {
-			"static_path": static_path,
-			"template_path": template_path,
-			"debug": debug,
-		}
+        settings = {
+            "static_path": static_path,
+            "template_path": template_path,
+            "debug": debug,
+        }
 
-		tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
+        tornado.wsgi.WSGIApplication.__init__(self, handlers, **settings)
 
 
 app = Application()
 
 if not debug:
-	application = sae.create_wsgi_app(app)
+    application = sae.create_wsgi_app(app)
 else:
-	import wsgiref.simple_server
-	try:
-		tornado.options.parse_command_line()
-		server = wsgiref.simple_server.make_server("", options.port, app)
-		server.serve_forever()
-	except KeyboardInterrupt:
-		print "close"
+    import wsgiref.simple_server
+    try:
+        tornado.options.parse_command_line()
+        server = wsgiref.simple_server.make_server("", options.port, app)
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print "close"
