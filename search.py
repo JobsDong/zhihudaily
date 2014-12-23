@@ -6,15 +6,22 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from whoosh.index import open_dir, create_in, exists_in
+
+import util
+from config import debug, INDEX_BUCKET
+
+if debug:
+    from whoosh.filedb import filestore
+    index_dir = INDEX_BUCKET
+    default_storage = filestore.FileStorage(path=index_dir)
+else:
+    index_dir = INDEX_BUCKET
+    default_storage = util.SaeStorage(INDEX_BUCKET, path=index_dir)
+
 from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import MultifieldParser
 from whoosh import highlight
-from jieba.analyse import ChineseAnalyzer
-
-import config
-import util
 
 
 class MarkFormatter(highlight.Formatter):
@@ -33,19 +40,18 @@ class MarkFormatter(highlight.Formatter):
 
 class FTS(object):
 
-    def __init__(self):
-        index_path = config.index_path
-        analyzer = ChineseAnalyzer()
+    def __init__(self, index_dir=index_dir, storage=default_storage):
         self._fragmenter_maxchars = 70
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
-                        title=TEXT(analyzer=analyzer),
-                        content=TEXT(analyzer=analyzer))
-        if exists_in(index_path):
-            self._ix = open_dir(index_path, schema=schema)
+                        title=TEXT(),
+                        content=TEXT())
+        if storage.index_exists(index_dir):
+            self._ix = storage.open_index(schema=schema)
         else:
-            self._ix = create_in(index_path, schema=schema)
+            self._ix = storage.create_index(schema=schema)
+
         self._parser = MultifieldParser(["content"], self._ix.schema)
         self._searcher = self._ix.searcher()
 

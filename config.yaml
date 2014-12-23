@@ -12,4 +12,4 @@ libraries:
   version: "3.0.0"
 
 - name: "lxml"
-  version: "3.0.0"
+  version: "2.3.4"
