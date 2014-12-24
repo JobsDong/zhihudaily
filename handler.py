@@ -10,7 +10,7 @@ import tornado.web
 import operation
 import config
 import database
-import search
+from search import fts
 import util
 
 
@@ -86,7 +86,7 @@ class SearchHandler(BaseHandler):
     """
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
-        self._fts = search.FTS()
+        self._fts = fts
         self._db = database.Dao()
 
     def get(self, *args, **kwargs):

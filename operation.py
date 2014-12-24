@@ -14,7 +14,7 @@ import httplib
 from config import debug, IMAGE_BUCKET
 import daily
 import database
-import search
+from search import fts
 import util
 
 if debug:
@@ -59,7 +59,6 @@ def fetch_before(params):
     date_str = params['date'][0]
     zh = daily.ZhiHu()
     dao = database.Dao()
-    fts = search.FTS()
     try:
         # 获取最新的news_id列表
         latest_news = zh.get_before_news(date_str)
@@ -101,7 +100,6 @@ def fetch_latest(params):
     """
     zh = daily.ZhiHu()
     dao = database.Dao()
-    fts = search.FTS()
 
     try:
         # 获取最新的news_id列表
@@ -143,7 +141,6 @@ def recreate_index(params):
     :return:
     """
     dao = database.Dao()
-    fts = search.FTS()
     try:
         # clearing index
         fts.clear()

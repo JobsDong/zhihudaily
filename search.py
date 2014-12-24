@@ -8,20 +8,21 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 
 import util
-from config import debug, INDEX_BUCKET
+from config import debug, FS_BUCKET, index_dir, jieba_dir
 
 if debug:
     from whoosh.filedb import filestore
-    index_dir = INDEX_BUCKET
     default_storage = filestore.FileStorage(path=index_dir)
 else:
-    index_dir = INDEX_BUCKET
-    default_storage = util.SaeStorage(INDEX_BUCKET, path=index_dir)
+    default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
+    util.initialize_jieba(FS_BUCKET, jieba_dir)
 
 from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import MultifieldParser
 from whoosh import highlight
+
+analyzer = util.ChineseAnalyzer()
 
 
 class MarkFormatter(highlight.Formatter):
@@ -45,8 +46,8 @@ class FTS(object):
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
-                        title=TEXT(),
-                        content=TEXT())
+                        title=TEXT(analyzer=analyzer),
+                        content=TEXT(analyzer=analyzer))
         if storage.index_exists(index_dir):
             self._ix = storage.open_index(schema=schema)
         else:
@@ -89,3 +90,5 @@ class FTS(object):
 
     def close(self):
         self._searcher.close()
+
+fts = FTS()
