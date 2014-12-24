@@ -59,7 +59,7 @@ class SaeStorage(Storage):
     def __init__(self, bucket_name, path):
         self.bucket_name = bucket_name
         self.folder = path
-        self._bucket = None
+        self._bucket = Bucket(self.folder)
         self.locks = {}
 
     def __repr__(self):
@@ -67,8 +67,6 @@ class SaeStorage(Storage):
                                self.folder)
 
     def create(self):
-        bucket = Bucket(self.folder)
-        self._bucket = bucket
         return self
 
     def destroy(self):
@@ -77,9 +75,9 @@ class SaeStorage(Storage):
         # REMOVE locks
         del self.locks
 
-    def create_file(self, name):
+    def create_file(self, name, **kwargs):
         def onclose_fn(sfile):
-            self._bucket.put_object(self._fpath(name), sfile.file)
+            self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
 
         f = StructFile(BytesIO(), name=name, onclose=onclose_fn)
         return f
@@ -90,7 +88,7 @@ class SaeStorage(Storage):
         content = self._bucket.get_object_contents(self._fpath(name))
 
         def onclose_fn(sfile):
-            self._bucket.put_object(self._fpath(name), sfile.file)
+            self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
 
         return StructFile(BytesIO(content), name=name, onclose=onclose_fn)
 
@@ -106,26 +104,26 @@ class SaeStorage(Storage):
         file_generate = self._bucket.list(path=self._fpath(""))
         file_names = []
         for f in file_generate:
-            file_names.append(f['name'][len(self.folder)+2:])
+            file_names.append(f['name'][len(self.folder)+1:])
         return file_names
 
     def file_exists(self, name):
-        return self._bucket.stat_object(self._fpath(name)) is not None
+        return name in self.list()
 
     def file_modified(self, name):
         return self._bucket.stat_object(self._fpath(name))\
             .get('last_modified', '')
 
     def file_length(self, name):
-        return self._bucket.stat_object(self._fpath(name))['bytes']
+        return int(self._bucket.stat_object(self._fpath(name))['bytes'])
 
     def delete_file(self, name):
         self._bucket.delete_object(self._fpath(name))
 
     def rename_file(self, name, newname, safe=False):
-        if self._bucket.stat_object(self._fpath(name)) is None:
+        if name not in self.list():
             raise NameError(name)
-        if safe and self._bucket.stat_object(self._fpath(name)) is not None:
+        if safe and newname in self.list():
             raise NameError("File %r exists" % newname)
 
         content = self._bucket.get_object_contents(self._fpath(name))
