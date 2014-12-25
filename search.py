@@ -11,7 +11,10 @@ import util
 from config import debug, FS_BUCKET, index_dir, jieba_dir
 
 if debug:
+    import os
     from whoosh.filedb import filestore
+    if not os.path.exists(index_dir):
+        os.mkdir(index_dir)
     default_storage = filestore.FileStorage(path=index_dir)
     import jieba.analyse
     analyzer = jieba.analyse.ChineseAnalyzer()
