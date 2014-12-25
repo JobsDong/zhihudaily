@@ -6,6 +6,7 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import traceback
 import logging
 import urlparse
 import hashlib
@@ -58,38 +59,28 @@ def fetch_before(params):
 
     date_str = params['date'][0]
     zh = daily.ZhiHu()
-    dao = database.Dao()
-    try:
-        # 获取最新的news_id列表
-        latest_news = zh.get_before_news(date_str)
-        news_ids = _extract_news_ids(latest_news)
-        date_str = _extract_date_str(latest_news)
 
-        # 找出数据库中没有的news_id列表
-        not_exists_news_ids = []
-        for news_id in news_ids:
-            if not dao.exist(news_id):
-                not_exists_news_ids.append(news_id)
+    # 获取最新的news_id列表
+    latest_news = zh.get_before_news(date_str)
+    news_ids = _extract_news_ids(latest_news)
+    date_str = _extract_date_str(latest_news)
 
-        # 获取news, 并保存到数据库
-        not_exists_news_ids.reverse()
-        for news_id in not_exists_news_ids:
-            try:
-                news = zh.get_news(news_id)
-                # 下载图片
-                image_url = news['image'] if 'image' in news else news['theme_image']
-                image_type, image_data = _fetch_image(news['share_url'], image_url)
-                # 存储图片
-                public_image_url = _store_image(news['image'], image_type, image_data)
-                dao.insert(public_image_url, date_str, news)
-                # 创建索引
-                body_text = util.extract_text(news.get('body', ''))
-                fts.add_doc(str(news['id']), news['title'], body_text)
-            except Exception as e:
-                logging.error("fetch before error", e)
-    finally:
-        dao.close()
-        fts.close()
+    # 找出数据库中没有的news_id列表
+    not_exists_news_ids = _not_exists_news_ids(date_str, news_ids)
+
+    # 获取news和下载图片
+    not_exists_news_ids.reverse()
+    wait_for_store_news_list = _get_news_list(not_exists_news_ids)
+
+    # 保存图片
+    wait_for_store_news_list = _store_images(wait_for_store_news_list, date_str)
+
+    # 保存news到数据库中
+    _store_news_list(wait_for_store_news_list)
+
+    # 创建索引
+    _index_news_list([wait_for_store_news['news'] for wait_for_store_news
+                      in wait_for_store_news_list])
 
 
 @operation_route(r"/operation/fetch_latest")
@@ -99,67 +90,106 @@ def fetch_latest(params):
     :return:
     """
     zh = daily.ZhiHu()
+
+    # 获取最新的news_id列表
+    latest_news = zh.get_latest_news()
+    latest_news_ids = _extract_news_ids(latest_news)
+    date_str = _extract_date_str(latest_news)
+
+    # 找出数据库中没有的news_id列表
+    not_exists_news_ids = _not_exists_news_ids(date_str, latest_news_ids)
+
+    # 获取news和下载图片
+    not_exists_news_ids.reverse()
+    wait_for_store_news_list = _get_news_list(not_exists_news_ids)
+
+    # 保存图片
+    wait_for_store_news_list = _store_images(wait_for_store_news_list, date_str)
+
+    # 保存news到数据库中
+    _store_news_list(wait_for_store_news_list)
+
+    # 创建索引
+    _index_news_list([wait_for_store_news['news'] for wait_for_store_news
+                      in wait_for_store_news_list])
+
+
+def _not_exists_news_ids(date_str, latest_news_ids):
+    """找出所有不存在的news_ids
+
+    :param date_str:
+    :param latest_news_ids:
+    :return:
+    """
     dao = database.Dao()
-
+    not_exists_news_ids = []
     try:
-        # 获取最新的news_id列表
-        latest_news = zh.get_latest_news()
-        news_ids = _extract_news_ids(latest_news)
-        date_str = _extract_date_str(latest_news)
-
-        # 找出数据库中没有的news_id列表
-        not_exists_news_ids = []
-        for news_id in news_ids:
-            if not dao.exist(news_id):
+        exists_news_ids = [str(news[1]) for news
+                           in dao.select_news_list(date_str)]
+        for news_id in latest_news_ids:
+            if news_id not in exists_news_ids:
                 not_exists_news_ids.append(news_id)
-
-        # 获取news, 并保存到数据库
-        not_exists_news_ids.reverse()
-        for news_id in not_exists_news_ids:
-            try:
-                news = zh.get_news(news_id)
-                # 下载图片
-                image_url = news['image'] if 'image' in news else news['theme_image']
-                image_type, image_data = _fetch_image(news['share_url'], image_url)
-                # 存储图片
-                public_image_url = _store_image(image_url, image_type, image_data)
-                dao.insert(public_image_url, date_str, news)
-                # 创建索引
-                body_text = util.extract_text(news.get('body', ''))
-                fts.add_doc(str(news['id']), news['title'], body_text)
-            except Exception as e:
-                logging.error("fetch latest error", e)
     finally:
-        fts.close()
         dao.close()
+    return not_exists_news_ids
 
-@operation_route(r"/operation/recreate_index")
-def recreate_index(params):
-    """重建索引
 
-    :param params:
+def _get_news_list(news_ids):
+    """获取所有的news，image信息
+
+    :param news_ids:
+    :return:
+    """
+    zh = daily.ZhiHu()
+
+    wait_for_store_news_list = []
+    for news_id in news_ids:
+        try:
+            news = zh.get_news(news_id)
+            # 下载图片
+            image_url = news['image'] if 'image' in news else news['theme_image']
+            image_type, image_data = _fetch_image(news['share_url'], image_url)
+
+            wait_for_store_news_list.append(dict(news=news,
+                                                 image_type=image_type,
+                                                 image_data=image_data,
+                                                 image_url=image_url))
+        except Exception as e:
+            stack = traceback.format_exc()
+            logging.error("fetch latest error %s\n%s" % (e, stack))
+
+    return wait_for_store_news_list
+
+
+def _index_news_list(news_list):
+    for news in news_list:
+        body_text = util.extract_text(news.get('body', ''))
+        fts.add_doc(str(news['id']), news['title'], body_text)
+
+
+def _store_news_list(news_list):
+    """将news_list保存到数据库中
+
+    :param news_list:
     :return:
     """
     dao = database.Dao()
     try:
-        # clearing index
-        fts.clear()
-
-        # create
-        for news in dao.all_news_list():
-            try:
-                news_id = news[1]
-                news_title = news[2]
-                body_text = util.extract_text(news[5])
-                fts.add_doc(str(news_id), news_title, body_text)
-            except Exception as e:
-                logging.error("index error", e)
+        for news in news_list:
+            dao.insert(news['public_image_url'],
+                       news['date_str'],
+                       news['news'])
     finally:
-        fts.close()
         dao.close()
 
 
 def _fetch_image(news_url, image_url):
+    """获取图片内容
+
+    :param news_url:
+    :param image_url:
+    :return:
+    """
     _, host_port, path, _, _ = urlparse.urlsplit(image_url)
     host_port = host_port.split(":")
     host = host_port[0]
@@ -175,21 +205,30 @@ def _fetch_image(news_url, image_url):
         return None, None
 
 
-def _store_image(image_url, image_type, image_data):
-    """保存图片信息，并返回外链
+def _store_images(news_list, date_str):
+    """保存images
 
-    :param image_url:
-    :param image_type:
-    :param image_data:
+    :param news_list:
+    :param date_str:
     :return:
     """
     con = Connection()
-    m = hashlib.md5()
-    m.update(image_url)
-    object_name = m.hexdigest()
+    news_list_copy = []
+    for news in news_list:
+        a_news_copy = dict(news.items())
+        image_type = a_news_copy.pop('image_type')
+        image_data = a_news_copy.pop('image_data')
+        image_url = a_news_copy.pop('image_url')
+        # 保存image
+        object_name = hashlib.md5(image_url).hexdigest()
+        con.put_object(IMAGE_BUCKET, object_name, image_data, image_type)
+        public_image_url = con.generate_url(IMAGE_BUCKET, object_name)
 
-    con.put_object(IMAGE_BUCKET, object_name, image_data, image_type)
-    return con.generate_url(IMAGE_BUCKET, object_name)
+        a_news_copy['public_image_url'] = public_image_url
+        a_news_copy['date_str'] = date_str
+        news_list_copy.append(a_news_copy)
+
+    return news_list_copy
 
 
 def _extract_news_ids(latest_news):
