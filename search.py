@@ -13,16 +13,22 @@ from config import debug, FS_BUCKET, index_dir, jieba_dir
 if debug:
     from whoosh.filedb import filestore
     default_storage = filestore.FileStorage(path=index_dir)
+    import jieba.analyse
+    analyzer = jieba.analyse.ChineseAnalyzer()
+
 else:
     default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
-    util.initialize_jieba(FS_BUCKET, jieba_dir)
+    import saejieba
+    from sae.storage import Bucket
+    saejieba.bucket = Bucket(FS_BUCKET)
+    saejieba.jieba_cur_path = jieba_dir
+    import saejieba.analyse
+    analyzer = saejieba.analyse.ChineseAnalyzer()
 
 from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import MultifieldParser
 from whoosh import highlight
-
-analyzer = util.ChineseAnalyzer()
 
 
 class MarkFormatter(highlight.Formatter):
