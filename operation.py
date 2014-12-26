@@ -127,7 +127,7 @@ def _not_exists_news_ids(date_str, latest_news_ids):
         exists_news_ids = [str(news[1]) for news
                            in dao.select_news_list(date_str)]
         for news_id in latest_news_ids:
-            if news_id not in exists_news_ids:
+            if str(news_id) not in exists_news_ids:
                 not_exists_news_ids.append(news_id)
     finally:
         dao.close()
@@ -162,9 +162,12 @@ def _get_news_list(news_ids):
 
 
 def _index_news_list(news_list):
+    news_docs = []
     for news in news_list:
         body_text = util.extract_text(news.get('body', ''))
-        fts.add_doc(str(news['id']), news['title'], body_text)
+        news_docs.append(dict(news_id=news['id'], title=news['title'],
+                              content=body_text))
+    fts.add_many_docs(news_docs)
 
 
 def _store_news_list(news_list):

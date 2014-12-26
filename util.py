@@ -16,11 +16,11 @@ def extract_text(content):
 
 
 def str2unicode(text):
-    return text.decode('utf-8') if isinstance(text, str) else text
+    return text.decode('utf-8') if isinstance(text, str) else unicode(text)
 
 
 def unicode2str(text):
-    return text.encode('utf-8') if isinstance(text, unicode) else text
+    return text.encode('utf-8') if isinstance(text, unicode) else str(text)
 
 #----------------模拟Connection---------------
 from config import static_path

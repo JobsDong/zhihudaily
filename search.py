@@ -6,7 +6,8 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-
+import logging
+import traceback
 import util
 from config import debug, FS_BUCKET, index_dir, jieba_dir
 
@@ -82,6 +83,28 @@ class FTS(object):
 
         return search_results
 
+    def add_many_docs(self, news_list=None):
+        """增加许多文件
+        """
+        if news_list:
+            writer = self._ix.writer()
+            for news in news_list:
+                try:
+                    news_id = news['news_id']
+                    title = news['title']
+                    content = news['content']
+
+                    news_id = util.str2unicode(news_id)
+                    title = util.str2unicode(title)
+                    content = util.str2unicode(content)
+                    writer.add_document(news_id=news_id, title=title,
+                                        content=content)
+                except Exception, e:
+                    stack = traceback.format_exc()
+                    logging.error("add doc error:%s\n%s" % (e, stack))
+
+            writer.commit()
+
     def add_doc(self, news_id, title=None, content=None):
         """增加文件
         """
@@ -91,7 +114,7 @@ class FTS(object):
         content = util.str2unicode(content)
         writer.add_document(news_id=news_id, title=title,
                             content=content)
-        writer.commit(optimize=True, merge=True)
+        writer.commit()
 
     def clear(self):
         writer = self._ix.writer()

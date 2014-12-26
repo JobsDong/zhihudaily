@@ -5,6 +5,8 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import datetime
+import logging
+import traceback
 import hashlib
 import tornado.web
 import operation
@@ -47,6 +49,9 @@ class OperationHandler(BaseHandler):
                 try:
                     method(self.request.arguments)
                 except Exception as e:
+                    import traceback
+                    stack = traceback.format_exc()
+                    logging.error("operation error:%s\n%s" % (e, stack))
                     self.set_status(500)
                     self.write('{"code": 500, "msg": "%s"}' % str(e))
                 else:
@@ -59,21 +64,26 @@ class DayHandler(BaseHandler):
     """
     def __init__(self, application, request, **kwargs):
         super(DayHandler, self).__init__(application, request, **kwargs)
-        self._db = database.Dao()
 
     def get(self, *args, **kwargs):
         default_date_str = datetime.datetime.now().strftime("%Y%m%d")
         date_str = self.get_argument("date", default_date_str)
-        news_list = self._db.select_news_list(date_str)
 
-        after_date = None if date_str == default_date_str \
-            else after_date_str(date_str)
+        dao = database.Dao()
+        news_list = []
+        try:
+            news_list = dao.select_news_list(date_str)
 
-        # empty
-        if len(news_list) == 0 and date_str == default_date_str:
-            date_str = before_date_str(default_date_str)
-            news_list = self._db.select_news_list(date_str)
-            after_date = None
+            after_date = None if date_str == default_date_str \
+                else after_date_str(date_str)
+
+            # empty
+            if len(news_list) == 0 and date_str == default_date_str:
+                date_str = before_date_str(default_date_str)
+                news_list = dao.select_news_list(date_str)
+                after_date = None
+        finally:
+            dao.close()
 
         self.render("day.html", now_date=now_date_str(date_str),
                     before_date=before_date_str(date_str),
@@ -95,17 +105,25 @@ class SearchHandler(BaseHandler):
         hits = []
         results = self._fts.search(keywords, limit=10)
 
-        for hit in results:
-            news = self._db.get_news(hit['news_id'])
-            text = util.extract_text(news[5])
-            summary = hit.highlights('content', text=text, top=2)
-            hits.append(dict(
-                image_public_url=news[8],
-                share_url=news[3],
-                date=news[4],
-                title=news[2],
-                summary=summary,
-            ))
+        db = database.Dao()
+        try:
+            for hit in results:
+                try:
+                    news = self._db.get_news(hit['news_id'])
+                    text = util.extract_text(news[5])
+                    summary = hit.highlights('content', text=text, top=2)
+                    hits.append(dict(
+                        image_public_url=news[8],
+                        share_url=news[3],
+                        date=news[4],
+                        title=news[2],
+                        summary=summary,
+                    ))
+                except Exception, e:
+                    stack = traceback.format_exc()
+                    logging.error("one hit error: %s\n%s" % (e, stack))
+        finally:
+            db.close()
 
         self.render("search.html", hits=hits, keywords=keywords)
 
