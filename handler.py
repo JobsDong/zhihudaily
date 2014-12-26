@@ -97,7 +97,6 @@ class SearchHandler(BaseHandler):
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
         self._fts = fts
-        self._db = database.Dao()
 
     def get(self, *args, **kwargs):
         keywords = self.get_argument("keywords")
@@ -109,7 +108,7 @@ class SearchHandler(BaseHandler):
         try:
             for hit in results:
                 try:
-                    news = self._db.get_news(hit['news_id'])
+                    news = db.get_news(hit['news_id'])
                     text = util.extract_text(news[5])
                     summary = hit.highlights('content', text=text, top=2)
                     hits.append(dict(

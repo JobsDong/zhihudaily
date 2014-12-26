@@ -58,7 +58,7 @@ class FTS(object):
         schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(analyzer=analyzer),
                         content=TEXT(analyzer=analyzer))
-        if storage.index_exists(index_dir):
+        if storage.index_exists():
             self._ix = storage.open_index(schema=schema)
         else:
             self._ix = storage.create_index(schema=schema)
