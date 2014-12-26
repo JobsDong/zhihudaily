@@ -15,7 +15,7 @@
     <div class="col-md-10 col-md-offset-1">
         <form target="_self" method="get" action="/search">
             <div class="input-group">
-                <input type="search" name="keywords" class="form-control input-lg" placeholder="{{keywords}}">
+                <input type="search" name="keywords" value="{{ escape(keywords) }}" class="form-control input-lg" placeholder="search">
                 <span class="input-group-btn">
                     <button class="btn btn-lg btn-default" type="submit">Go!</button>
                 </span>
