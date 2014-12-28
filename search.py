@@ -24,7 +24,9 @@ else:
     default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
     import saejieba
     from sae.storage import Bucket
+    from sae.kvdb import KVClient
     saejieba.bucket = Bucket(FS_BUCKET)
+    saejieba.kv = KVClient()
     saejieba.jieba_cur_path = jieba_dir
     import saejieba.analyse
     analyzer = saejieba.analyse.ChineseAnalyzer()
