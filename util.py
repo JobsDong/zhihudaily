@@ -8,11 +8,14 @@ from lxml import html
 
 
 def extract_text(content):
-    tree = html.fromstring(content, parser=html.HTMLParser(encoding='utf-8'))
-    rc = []
-    for node in tree.itertext():
-        rc.append(node.strip())
-    return u''.join(rc)
+    try:
+        tree = html.fromstring(content, parser=html.HTMLParser(encoding='utf-8'))
+        rc = []
+        for node in tree.itertext():
+            rc.append(node.strip())
+        return u''.join(rc)
+    except Exception:
+        return content
 
 
 def str2unicode(text):
