@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>知乎日报 - 满足你的好奇心</title>
+{% end %}
+
+{% block css %}
+<link rel="stylesheet" href="../static/css/search.css">
+{% end %}
+
+{% block content %}
+<div style="margin-top: 40px;" class="row"></div>
+<!-- search button start -->
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <form target="_self" method="get" action="/search">
+            <div class="input-group">
+                <input type="search" name="keywords" value="{{ escape(keywords) }}" class="form-control input-lg" placeholder="search">
+                <span class="input-group-btn">
+                    <button class="btn btn-lg btn-default" type="submit">Go!</button>
+                </span>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- search button end -->
+
+<div style="margin-top: 40px;" class="row"></div>
+
+<!-- search result start -->
+{% if len(hits) == 0 %}
+<div class="row nors">
+    <div class="col-md-6 col-md-offset-3">很抱歉，没有找到与“{{ escape(keywords)}}”相关的网页。</div>
+</div>
+{% else %}
+{% for hit in hits%}
+<div class="row item">
+    <div class="col-md-3">
+        <img src="{{ escape(hit['image_public_url']) }}">
+    </div>
+
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-10 title text-left"><a href="{{ escape(hit['share_url']) }}">{{ escape(str(hit['title'])) }}</a></div>
+            <div class="col-md-2 date text-right">{{ escape(hit['date'])}}</div>
+        </div>
+
+        <div class="summary">{% raw hit['summary'] %}</div>
+    </div>
+</div>
+{% end %}
+{% end %}
+<!-- search result end -->
+
+{% end %}

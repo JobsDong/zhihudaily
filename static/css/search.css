@@ -1,0 +1,48 @@
+.nors {
+    height: 215px;
+    position: relative;
+    margin-top: 10px;
+    overflow: hidden;
+    font-size: 20px;
+}
+
+.item {
+    height: 215px;
+    position: relative;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.item:hover {
+    outline: solid 1px #33a9d8;
+}
+
+.item img {
+    position: absolute;
+    left: 0;
+    display: block;
+    width: 230px;
+    height: 215px;
+}
+
+.item .title {
+    font-size: 23px;
+    word-wrap: break-word;
+    height: 1.85;
+}
+
+.item .date {
+    font-size: 20px;
+    vertical-align: middle;
+    height: 1.75;
+}
+
+.item .summary {
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+.item a {
+    text-decoration: none;
+    color: #000000;
+}

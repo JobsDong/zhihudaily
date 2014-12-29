@@ -15,26 +15,32 @@ Demo地址: http://zhihurewen.sinaapp.com
 
 2. 创建表结构::
 
-	CREATE TABLE IF NOT EXISTS `news` (
-	`id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-	`news_id` varchar(50) NOT NULL UNIQUE,
-	`title` varchar(100) NOT NULL,
-	`share_url` varchar(100) NOT NULL,
-	`date` varchar(50) NOT NULL,
-	`body` text NOT NULL,
-	`image` varchar(100) NOT NULL,
-	`image_source` varchar(100) NOT NULL,
-	`image_public_url` varchar(100) NOT NULL
-	) DEFAULT CHARSET=utf8;
+    CREATE TABLE IF NOT EXISTS `news` (
+    `id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `news_id` varchar(50) NOT NULL UNIQUE,
+    `title` varchar(100) NOT NULL,
+    `share_url` varchar(100) NOT NULL,
+    `date` varchar(50) NOT NULL,
+    `body` longtext NOT NULL,
+    `image` varchar(100) NOT NULL,
+    `image_source` varchar(100) NOT NULL,
+    `image_public_url` varchar(100) NOT NULL
+    ) DEFAULT CHARSET=utf8;
+
+    CREATE INDEX date_index USING BTREE ON `news`(`date`);
+
+    CREATE INDEX news_id_index USING BTREE ON `news`(`news_id`);
 
 3. 修改配置文件config.py::
 
-	# 修改debug模式中的数据库配置
-	DB_HOST = "127.0.0.1"
-	DB_NAME = "daily"
-	DB_USER = "root"
-	DB_PASS = "root"
-	DB_PORT = 3306
+    # 密码(311521)的md5
+    secret = "76a4cebbe7af10ffd169cd9494adcf2f"
+    # 修改debug模式中的数据库配置
+    DB_HOST = "127.0.0.1"
+    DB_NAME = "daily"
+    DB_USER = "root"
+    DB_PASS = "root"
+    DB_PORT = 3306
 
 4. 运行::
 
@@ -48,23 +54,38 @@ SAE环境搭建
 
 2. 启动MySQL服务，并创建数据库和表结构
 
-3. 启动Storage服务，并创建Bucket
+3. 修改配置文件config.py::
 
-4. 修改配置文件config.py::
-
-	# bucket name
-	BUCKET = "dailyimage"
-	# 密码的md5
+	# 密码(311521)的md5
 	secret = "76a4cebbe7af10ffd169cd9494adcf2f"
 
-5. 修改sae的配置文件config.yaml::
+	# 索引目录名
+	index_dir = 'dailyindex'
+
+	# 分词词典，idf目录名
+    jieba_dir = 'dailyjieba'
+
+	# 图片存储的bucket name
+    IMAGE_BUCKET = "dailyimage"
+
+	# 索引,词典，idf文件保存的bucket name
+    FS_BUCKET = "dailyfiles"
+
+4. 启动Storage服务，并创建2个Bucket(IMAGE_BUCKET, FS_BUCKET)
+
+5. 上传词典，idf文件
+
+    在{FS_BUCKET}下，创建文件夹{index_dir}和{jieba_dir}。将dict.txt, idf.txt上传
+    到{jieba_dir}目录下。其中dict.txt, idf.txt可以在jieba的源码中找到。
+
+6. 修改sae的配置文件config.yaml::
 
 	# APP NAME
 	name: zhihurewen
-	# url后面的密码
+	# 定时采集 url后面的密码
 	url: /operation/fetch_latest?secret=311521
 
-6. 上传代码
+7. 上传代码
 
 
 注意
@@ -77,3 +98,10 @@ SAE环境搭建
 	"http://localhost:{port}/operation/fetch_latest?date=20140808&secret={secret}
 
 3. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
+
+4. TODO::
+
+    1. 性能优化
+    2. 搜索功能 (完成)
+    3. 非引用zhihu.com ?
+    4. 测试
