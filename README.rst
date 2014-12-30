@@ -63,13 +63,13 @@ SAE环境搭建
 	index_dir = 'dailyindex'
 
 	# 分词词典，idf目录名
-    jieba_dir = 'dailyjieba'
+	jieba_dir = 'dailyjieba'
 
 	# 图片存储的bucket name
-    IMAGE_BUCKET = "dailyimage"
+	IMAGE_BUCKET = "dailyimage"
 
 	# 索引,词典，idf文件保存的bucket name
-    FS_BUCKET = "dailyfiles"
+	FS_BUCKET = "dailyfiles"
 
 4. 启动Storage服务，并创建2个Bucket(IMAGE_BUCKET, FS_BUCKET)
 
@@ -95,7 +95,7 @@ SAE环境搭建
 	"http://localhost:{port}/operation/fetch_latest?secret={secret}
 
 2. 本地测试环境，采集某一天的数据
-	"http://localhost:{port}/operation/fetch_latest?date=20140808&secret={secret}
+	"http://localhost:{port}/operation/fetch_before?date=20140808&secret={secret}
 
 3. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
 
