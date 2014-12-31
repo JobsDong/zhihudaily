@@ -9,7 +9,7 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 import logging
 import traceback
 import util
-from config import debug, FS_BUCKET, index_dir, jieba_dir
+from config import debug, FS_BUCKET, index_dir
 
 if debug:
     import os
@@ -22,12 +22,8 @@ if debug:
 
 else:
     default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
-    import saejieba
-    from sae.storage import Bucket
-    saejieba.bucket = Bucket(FS_BUCKET)
-    saejieba.jieba_cur_path = jieba_dir
-    import saejieba.analyse
-    analyzer = saejieba.analyse.ChineseAnalyzer()
+    import analyse
+    analyzer = analyse.SaeAnalyzer()
 
 from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
@@ -51,7 +47,7 @@ class MarkFormatter(highlight.Formatter):
 
 class FTS(object):
 
-    def __init__(self, index_dir=index_dir, storage=default_storage):
+    def __init__(self, storage=default_storage):
         self._fragmenter_maxchars = 70
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()

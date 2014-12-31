@@ -17,9 +17,6 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 # index path
 index_dir = 'dailyindex'
 
-# jieba path
-jieba_dir = 'dailyjieba'
-
 
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
