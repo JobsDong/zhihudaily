@@ -12,7 +12,6 @@ import tornado.web
 import operation
 import config
 import database
-from search import fts
 import util
 
 
@@ -96,7 +95,8 @@ class SearchHandler(BaseHandler):
     """
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
-        self._fts = fts
+        import search
+        self._fts = search.fts
 
     def get(self, *args, **kwargs):
         keywords = self.get_argument("keywords")
