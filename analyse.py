@@ -34,11 +34,6 @@ class AnalyzeException(Exception):
 
 class SaeTokenizer(Tokenizer):
 
-    def __init__(self):
-        super(SaeTokenizer, self).__init__()
-        self._host = "segment.sae.sina.com.cn"
-        self._timeout = 10
-
     def cut(self, text):
         text = unicode2str(text)
         content = self._request(text)
@@ -46,8 +41,8 @@ class SaeTokenizer(Tokenizer):
         start_pos = 0
         for word in words:
             try:
-                yield word['word'], start_pos, start_pos + len(word)
-                start_pos += len(word)
+                yield word['word'], start_pos, start_pos + len(word['word'])
+                start_pos += len(word['word'])
             except Exception:
                 # sae analyzer unknown exception
                 pass
