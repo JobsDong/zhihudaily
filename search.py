@@ -93,7 +93,7 @@ class FTS(object):
                     news_id = util.str2unicode(news_id)
                     title = util.str2unicode(title)
                     content = util.str2unicode(content)
-                    writer.add_document(news_id=news_id, title=title,
+                    writer.update_document(news_id=news_id, title=title,
                                         content=content)
                 except Exception, e:
                     stack = traceback.format_exc()
@@ -108,7 +108,7 @@ class FTS(object):
         news_id = util.str2unicode(news_id)
         title = util.str2unicode(title)
         content = util.str2unicode(content)
-        writer.add_document(news_id=news_id, title=title,
+        writer.update_document(news_id=news_id, title=title,
                             content=content)
         writer.commit()
 

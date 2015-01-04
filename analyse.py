@@ -10,8 +10,8 @@ from whoosh.analysis import LowercaseFilter, StopFilter, StemFilter
 from whoosh.analysis import Tokenizer, Token
 from whoosh.lang.porter import stem
 
-import httplib
-import socket
+import urllib
+import urllib2
 import json
 import re
 
@@ -41,15 +41,16 @@ class SaeTokenizer(Tokenizer):
 
     def cut(self, text):
         text = unicode2str(text)
-        value = {"context": text}
-        content = self._do_http_request("POST",
-                                        "/urlclient.php?encoding=UTF-8&word_tag=0",
-                                        value=str(value))
-        words = json.loads(content)
+        content = self._request(text)
+        words = json.loads(content, encoding='UTF-8')
         start_pos = 0
         for word in words:
-            yield word['word'], start_pos, start_pos + len(word)
-            start_pos += len(word)
+            try:
+                yield word['word'], start_pos, start_pos + len(word)
+                start_pos += len(word)
+            except Exception:
+                # sae analyzer unknown exception
+                pass
 
     def __call__(self, text, **kargs):
         words = self.cut(text)
@@ -63,42 +64,12 @@ class SaeTokenizer(Tokenizer):
             token.endchar = stop_pos
             yield token
 
-    def _decode_msg(self, msg):
-        if isinstance(msg, str):
-            msg = unicode(msg, 'utf-8')
-
-        return msg
-
-    def _do_http_request(self, method, uri, headers=None, value=None):
-        if headers is None:
-            headers = {}
-        if value is not None:
-            length = len(value)
-            headers['Content-Length'] = length
-
-        http, content, msg, error, status = None, None, None, None, None
-        try:
-            http = httplib.HTTPConnection(self._host, timeout=self._timeout)
-            http.request(method, uri, value, headers)
-            response = http.getresponse()
-
-            status = response.status
-            if status / 100 == 2:
-                content = self._decode_msg(response.read())
-            else:
-                msg = response.reason
-                error = self._decode_msg(response.read())
-        except (httplib.HTTPException, socket.error, socket.timeout) as e:
-            raise AnalyzeException(str(e))
-        except Exception as e:
-            raise AnalyzeException(str(e))
-        finally:
-            if http:
-                http.close()
-        if msg:
-            raise AnalyzeException(status, msg, error)
-
-        return content
+    def _request(self, text):
+        payload = urllib.urlencode([('context', text),])
+        args = urllib.urlencode([('word_tag', 0), ('encoding', 'UTF-8'),])
+        url = "http://segment.sae.sina.com.cn/urlclient.php" + "?" + args
+        result = urllib2.urlopen(url, payload).read()
+        return result
 
 
 def SaeAnalyzer(stoplist=STOP_WORDS, minsize=1, stemfn=stem, cachesize=50000):
