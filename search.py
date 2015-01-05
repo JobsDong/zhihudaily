@@ -52,14 +52,14 @@ class FTS(object):
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
-                        title=TEXT(analyzer=analyzer),
+                        title=TEXT(field_boost=2.0, analyzer=analyzer),
                         content=TEXT(analyzer=analyzer))
         if storage.index_exists():
             self._ix = storage.open_index(schema=schema)
         else:
             self._ix = storage.create_index(schema=schema)
 
-        self._parser = MultifieldParser(["content"], self._ix.schema)
+        self._parser = MultifieldParser(["title", "content"], self._ix.schema)
         self._searcher = self._ix.searcher()
 
     def search(self, query_string, limit=10):

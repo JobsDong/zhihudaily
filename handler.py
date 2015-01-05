@@ -99,8 +99,11 @@ class SearchHandler(BaseHandler):
         self._fts = search.fts
 
     def get(self, *args, **kwargs):
-        keywords = self.get_argument("keywords")
-        # search
+        keywords = self.get_argument("keywords", "")
+        if not keywords.strip():
+            self.redirect("/")
+            return
+
         hits = []
         results = self._fts.search(keywords, limit=10)
 
