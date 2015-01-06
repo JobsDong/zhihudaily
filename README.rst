@@ -41,6 +41,8 @@ Demo地址: http://zhihurewen.sinaapp.com
     DB_USER = "root"
     DB_PASS = "root"
     DB_PORT = 3306
+    MEMCACHE_HOST = "127.0.0.1"
+
 
 4. 运行::
 
@@ -52,7 +54,7 @@ SAE环境搭建
 
 1. 申请sae账户，并且创建python应用
 
-2. 启动MySQL服务，并创建数据库和表结构
+2. 启动MySQL, Memcache服务，并创建数据库和表结构
 
 3. 修改配置文件config.py::
 
@@ -97,3 +99,4 @@ SAE环境搭建
     2. 搜索功能 (完成)
     3. 非引用zhihu.com ?
     4. 测试
+    5. 日志输出优化
