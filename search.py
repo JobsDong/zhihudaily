@@ -9,7 +9,7 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 import logging
 import traceback
 import util
-from config import debug, FS_BUCKET, index_dir, jieba_dir
+from config import debug, FS_BUCKET, index_dir
 
 if debug:
     import os
@@ -22,12 +22,8 @@ if debug:
 
 else:
     default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
-    import saejieba
-    from sae.storage import Bucket
-    saejieba.bucket = Bucket(FS_BUCKET)
-    saejieba.jieba_cur_path = jieba_dir
-    import saejieba.analyse
-    analyzer = saejieba.analyse.ChineseAnalyzer()
+    import analyse
+    analyzer = analyse.SaeAnalyzer()
 
 from whoosh import writing
 from whoosh.fields import Schema, TEXT, ID
@@ -51,19 +47,19 @@ class MarkFormatter(highlight.Formatter):
 
 class FTS(object):
 
-    def __init__(self, index_dir=index_dir, storage=default_storage):
+    def __init__(self, storage=default_storage):
         self._fragmenter_maxchars = 70
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
-                        title=TEXT(analyzer=analyzer),
+                        title=TEXT(field_boost=2.0, analyzer=analyzer),
                         content=TEXT(analyzer=analyzer))
         if storage.index_exists():
             self._ix = storage.open_index(schema=schema)
         else:
             self._ix = storage.create_index(schema=schema)
 
-        self._parser = MultifieldParser(["content"], self._ix.schema)
+        self._parser = MultifieldParser(["title", "content"], self._ix.schema)
         self._searcher = self._ix.searcher()
 
     def search(self, query_string, limit=10):
@@ -97,8 +93,8 @@ class FTS(object):
                     news_id = util.str2unicode(news_id)
                     title = util.str2unicode(title)
                     content = util.str2unicode(content)
-                    writer.add_document(news_id=news_id, title=title,
-                                        content=content)
+                    writer.update_document(news_id=news_id, title=title,
+                                           content=content)
                 except Exception, e:
                     stack = traceback.format_exc()
                     logging.error("add doc error:%s\n%s" % (e, stack))
@@ -112,8 +108,8 @@ class FTS(object):
         news_id = util.str2unicode(news_id)
         title = util.str2unicode(title)
         content = util.str2unicode(content)
-        writer.add_document(news_id=news_id, title=title,
-                            content=content)
+        writer.update_document(news_id=news_id, title=title,
+                               content=content)
         writer.commit()
 
     def clear(self):

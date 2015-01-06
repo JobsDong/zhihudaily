@@ -18,7 +18,7 @@ Demo地址: http://zhihurewen.sinaapp.com
     CREATE TABLE IF NOT EXISTS `news` (
     `id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `news_id` varchar(50) NOT NULL UNIQUE,
-    `title` varchar(100) NOT NULL,
+    `title` varchar(200) NOT NULL,
     `share_url` varchar(100) NOT NULL,
     `date` varchar(50) NOT NULL,
     `body` longtext NOT NULL,
@@ -41,6 +41,8 @@ Demo地址: http://zhihurewen.sinaapp.com
     DB_USER = "root"
     DB_PASS = "root"
     DB_PORT = 3306
+    MEMCACHE_HOST = "127.0.0.1"
+
 
 4. 运行::
 
@@ -52,7 +54,7 @@ SAE环境搭建
 
 1. 申请sae账户，并且创建python应用
 
-2. 启动MySQL服务，并创建数据库和表结构
+2. 启动MySQL, Memcache服务，并创建数据库和表结构
 
 3. 修改配置文件config.py::
 
@@ -62,23 +64,15 @@ SAE环境搭建
 	# 索引目录名
 	index_dir = 'dailyindex'
 
-	# 分词词典，idf目录名
-	jieba_dir = 'dailyjieba'
-
 	# 图片存储的bucket name
 	IMAGE_BUCKET = "dailyimage"
 
-	# 索引,词典，idf文件保存的bucket name
+	# 索引保存的bucket name
 	FS_BUCKET = "dailyfiles"
 
 4. 启动Storage服务，并创建2个Bucket(IMAGE_BUCKET, FS_BUCKET)
 
-5. 上传词典，idf文件
-
-    在{FS_BUCKET}下，创建文件夹{index_dir}和{jieba_dir}。将dict.txt, idf.txt上传
-    到{jieba_dir}目录下。其中dict.txt, idf.txt可以在jieba的源码中找到。
-
-6. 修改sae的配置文件config.yaml::
+5. 修改sae的配置文件config.yaml::
 
 	# APP NAME
 	name: zhihurewen
@@ -101,7 +95,8 @@ SAE环境搭建
 
 4. TODO::
 
-    1. 性能优化
+    1. 性能优化 (完成)
     2. 搜索功能 (完成)
     3. 非引用zhihu.com ?
     4. 测试
+    5. 日志输出优化

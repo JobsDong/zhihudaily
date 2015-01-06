@@ -25,7 +25,7 @@ def str2unicode(text):
 def unicode2str(text):
     return text.encode('utf-8') if isinstance(text, unicode) else str(text)
 
-#----------------模拟Connection---------------
+#----------------本地化的Connection---------------
 from config import static_path
 
 
@@ -44,7 +44,7 @@ class Connection(object):
     def generate_url(self, bucket_name, object_name):
         return "/static/%s/%s" % (bucket_name, object_name)
 
-#------------模拟whoosh-----------
+#------------SAE支持的whoosh-----------
 
 import os
 from threading import Lock
@@ -143,3 +143,38 @@ class SaeStorage(Storage):
         path = os.path.join(self.folder, name)
         tempstore = SaeStorage(self.bucket_name, path)
         return tempstore.create()
+
+import pylibmc
+import config
+
+if config.debug:
+    mc_client = pylibmc.Client([config.MEMCACHE_HOST])
+else:
+    mc_client = pylibmc.Client([])
+
+
+# ----------------------memorized------------------------------------------
+def cached(expiration=60*30, key=None):
+
+    def wrap(fn):
+        def _wrap(*args, **kwargs):
+
+            if key:
+                mc_key = key
+            else:
+                mc_key = "%s:%s-%s-%s" % ("cached", fn.func_name,
+                                          str(args), str(kwargs))
+
+            result = mc_client.get(mc_key)
+            print result
+            if not result:
+                result = fn(*args, **kwargs)
+
+                try:
+                    mc_client.set(mc_key, result, time=expiration)
+                except ValueError:
+                    pass
+
+            return result
+        return _wrap
+    return wrap

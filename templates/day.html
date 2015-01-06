@@ -31,11 +31,11 @@
 <div class="row features">
     {% for news in news_list %}
     <div class="col-md-4">
-        <div href="{{ escape(news[3]) }}" class="feature">
+        <div href="{{ escape(news['share_url']) }}" class="feature">
             <div class="mask"></div>
-            <img src="{{ escape(news[8]) }}" alt="{{ escape(news[7]) }}">
-            <a href="{{ escape(news[3]) }}">
-                <h3>{{ escape(news[2]) }}</h3>
+            <img src="{{ escape(news['image_public_url']) }}" alt="{{ escape(news['image_source']) }}">
+            <a href="{{ escape(news['share_url']) }}">
+                <h3>{{ escape(news['title']) }}</h3>
             </a>
         </div>
     </div>
