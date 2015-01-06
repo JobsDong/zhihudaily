@@ -94,7 +94,7 @@ class FTS(object):
                     title = util.str2unicode(title)
                     content = util.str2unicode(content)
                     writer.update_document(news_id=news_id, title=title,
-                                        content=content)
+                                           content=content)
                 except Exception, e:
                     stack = traceback.format_exc()
                     logging.error("add doc error:%s\n%s" % (e, stack))
@@ -109,7 +109,7 @@ class FTS(object):
         title = util.str2unicode(title)
         content = util.str2unicode(content)
         writer.update_document(news_id=news_id, title=title,
-                            content=content)
+                               content=content)
         writer.commit()
 
     def clear(self):

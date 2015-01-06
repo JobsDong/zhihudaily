@@ -68,21 +68,16 @@ class DayHandler(BaseHandler):
         default_date_str = datetime.datetime.now().strftime("%Y%m%d")
         date_str = self.get_argument("date", default_date_str)
 
-        dao = database.Dao()
-        news_list = []
-        try:
-            news_list = dao.select_news_list(date_str)
+        news_list = _get_news(date_str)
 
-            after_date = None if date_str == default_date_str \
-                else after_date_str(date_str)
+        after_date = None if date_str == default_date_str \
+            else after_date_str(date_str)
 
-            # empty
-            if len(news_list) == 0 and date_str == default_date_str:
-                date_str = before_date_str(default_date_str)
-                news_list = dao.select_news_list(date_str)
-                after_date = None
-        finally:
-            dao.close()
+        # empty
+        if len(news_list) == 0 and date_str == default_date_str:
+            date_str = before_date_str(default_date_str)
+            news_list = _get_news(date_str)
+            after_date = None
 
         self.render("day.html", now_date=now_date_str(date_str),
                     before_date=before_date_str(date_str),
@@ -90,13 +85,28 @@ class DayHandler(BaseHandler):
                     news_list=news_list)
 
 
+@util.cached(expiration=60*30)
+def _get_news(date_str):
+    news_list = []
+    dao = database.Dao()
+    try:
+        newses = dao.select_news_list(date_str)
+        if newses:
+            for news in newses:
+                news_list.append(dict(share_url=news[3],
+                                      image_public_url=news[8],
+                                      image_source=news[7],
+                                      title=news[2]))
+        return news_list
+    finally:
+        dao.close()
+
+
 class SearchHandler(BaseHandler):
     """处理搜索
     """
     def __init__(self, application, request, **kwargs):
         super(SearchHandler, self).__init__(application, request, **kwargs)
-        import search
-        self._fts = search.fts
 
     def get(self, *args, **kwargs):
         keywords = self.get_argument("keywords", "")
@@ -104,30 +114,36 @@ class SearchHandler(BaseHandler):
             self.redirect("/")
             return
 
-        hits = []
-        results = self._fts.search(keywords, limit=10)
-
-        db = database.Dao()
-        try:
-            for hit in results:
-                try:
-                    news = db.get_news(hit['news_id'])
-                    text = util.extract_text(news[5])
-                    summary = hit.highlights('content', text=text, top=2)
-                    hits.append(dict(
-                        image_public_url=news[8],
-                        share_url=news[3],
-                        date=news[4],
-                        title=news[2],
-                        summary=summary,
-                    ))
-                except Exception, e:
-                    stack = traceback.format_exc()
-                    logging.error("one hit error: %s\n%s" % (e, stack))
-        finally:
-            db.close()
-
+        hits = _search(keywords)
         self.render("search.html", hits=hits, keywords=keywords)
+
+
+@util.cached(expiration=60*30)
+def _search(keywords):
+    import search
+    hits = []
+    results = search.fts.search(keywords, limit=10)
+    db = database.Dao()
+    try:
+        for hit in results:
+            try:
+                news = db.get_news(hit['news_id'])
+                text = util.extract_text(news[5])
+                summary = hit.highlights('content', text=text, top=2)
+                hits.append(dict(
+                    image_public_url=news[8],
+                    share_url=news[3],
+                    date=news[4],
+                    title=news[2],
+                    summary=summary,
+                ))
+            except Exception, e:
+                stack = traceback.format_exc()
+                logging.error("one hit error: %s\n%s" % (e, stack))
+    finally:
+        db.close()
+
+    return hits
 
 
 class ErrorHandler(BaseHandler):
