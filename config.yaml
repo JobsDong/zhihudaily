@@ -13,3 +13,14 @@ libraries:
 
 - name: "lxml"
   version: "2.3.4"
+
+handlers:
+- url: /static/
+  static_path: static
+  gzip: on
+
+- url: /robots.txt
+  static_path: static/robots.txt
+
+- url: /favicon.ico
+  static_path: static/favicon.ico

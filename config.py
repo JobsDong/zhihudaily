@@ -17,10 +17,6 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 # index path
 index_dir = 'dailyindex'
 
-# jieba path
-jieba_dir = 'dailyjieba'
-
-
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
 
@@ -36,6 +32,7 @@ if debug:
     DB_USER = "root"
     DB_PASS = "root"
     DB_PORT = 3306
+    MEMCACHE_HOST = "127.0.0.1"
 else:
     import sae.const
 

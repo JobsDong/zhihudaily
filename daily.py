@@ -55,7 +55,7 @@ class ZhiHu(object):
     def _do_http_request(self, url):
         http, content, msg, error, status = None, None, None, None, None
         try:
-            http = httplib.HTTPConnection(self._host, self._port, self._port)
+            http = httplib.HTTPConnection(self._host, self._port, self._timeout)
             http.request("GET", url)
             response = http.getresponse()
 

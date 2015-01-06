@@ -15,7 +15,6 @@ import httplib
 from config import debug, IMAGE_BUCKET
 import daily
 import database
-from search import fts
 import util
 
 if debug:
@@ -162,6 +161,7 @@ def _get_news_list(news_ids):
 
 
 def _index_news_list(news_list):
+    from search import fts
     news_docs = []
     for news in news_list:
         body_text = util.extract_text(news.get('body', ''))
