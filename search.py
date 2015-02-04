@@ -21,7 +21,8 @@ if debug:
     analyzer = jieba.analyse.ChineseAnalyzer()
 
 else:
-    default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
+    # default_storage = util.SaeStorage(FS_BUCKET, path=index_dir)
+    default_storage = util.SaeMemcacheStorage(index_dir)
     import analyse
     analyzer = analyse.SaeAnalyzer()
 
