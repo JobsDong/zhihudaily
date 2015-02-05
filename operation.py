@@ -161,13 +161,14 @@ def _get_news_list(news_ids):
 
 
 def _index_news_list(news_list):
-    from search import fts
+    import search
+    fts_indexer = search.FTSIndexer()
     news_docs = []
     for news in news_list:
         body_text = util.extract_text(news.get('body', ''))
         news_docs.append(dict(news_id=news['id'], title=news['title'],
                               content=body_text))
-    fts.add_many_docs(news_docs)
+    fts_indexer.add_many_docs(news_docs)
 
 
 def _store_news_list(news_list):

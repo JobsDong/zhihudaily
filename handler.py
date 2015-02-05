@@ -118,11 +118,12 @@ class SearchHandler(BaseHandler):
         self.render("search.html", hits=hits, keywords=keywords)
 
 
-@util.cached(expiration=60*30)
 def _search(keywords):
     import search
     hits = []
-    results = search.fts.search(keywords, limit=10)
+    fts_searcher = search.FTSSearcher()
+    results = fts_searcher.search(keywords, limit=10)
+
     db = database.Dao()
     try:
         for hit in results:
@@ -142,6 +143,7 @@ def _search(keywords):
                 logging.error("one hit error: %s\n%s" % (e, stack))
     finally:
         db.close()
+        fts_searcher.close()
 
     return hits
 
