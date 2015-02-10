@@ -77,7 +77,9 @@ SAE环境搭建
 	# APP NAME
 	name: zhihurewen
 	# 定时采集 url后面的密码
-	url: /operation/fetch_latest?secret=311521
+	url: /operation/fetch?secret=311521
+	# 定时建立索引
+	url: /operation/index?secret=311521
 
 7. 上传代码
 
@@ -86,14 +88,20 @@ SAE环境搭建
 ==============
 
 1. 本地测试环境中，数据不会自动采集，可以手动启动采集当天的数据
-	"http://localhost:{port}/operation/fetch_latest?secret={secret}
+	"http://localhost:{port}/operation/fetch?secret={secret}
 
 2. 本地测试环境，采集某一天的数据
-	"http://localhost:{port}/operation/fetch_before?date=20140808&secret={secret}
+	"http://localhost:{port}/operation/fetch?date=20140808&secret={secret}
 
-3. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
+3. 本地测试环境，数据不会自动建立索引，可以手动启动建立索引
+    "http://localhost:{port}/operation/index?secret={secret}
 
-4. TODO::
+4. 本地测试环境，对某一天建立索引
+    "http://localhost:{port}/opertion/index?date=20140808&secret={secret}
+
+5. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
+
+6. TODO::
 
     1. 性能优化 (完成)
     2. 搜索功能 (完成)

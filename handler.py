@@ -71,16 +71,16 @@ class DayHandler(BaseHandler):
         news_list = _get_news(date_str)
 
         after_date = None if date_str == default_date_str \
-            else after_date_str(date_str)
+            else util.after_date_str(date_str)
 
         # empty
         if len(news_list) == 0 and date_str == default_date_str:
-            date_str = before_date_str(default_date_str)
+            date_str = util.before_date_str(default_date_str)
             news_list = _get_news(date_str)
             after_date = None
 
-        self.render("day.html", now_date=now_date_str(date_str),
-                    before_date=before_date_str(date_str),
+        self.render("day.html", now_date=util.now_date_str(),
+                    before_date=util.before_date_str(date_str),
                     after_date=after_date,
                     news_list=news_list)
 
@@ -154,32 +154,3 @@ class ErrorHandler(BaseHandler):
 
     def prepare(self):
         self.render("404.html")
-
-
-def before_date_str(date_str):
-    """计算前一天的date_str
-
-    :param date_str:
-    :return:
-    """
-    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
-    before_date = now_date - datetime.timedelta(days=1)
-    return before_date.strftime("%Y%m%d")
-
-
-def after_date_str(date_str):
-    """计算后一天的date_str
-
-    :param date_str:
-    :return:
-    """
-    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
-    before_date = now_date + datetime.timedelta(days=1)
-    return before_date.strftime("%Y%m%d")
-
-
-def now_date_str(date_str):
-    if datetime.datetime.now().strftime("%Y%m%d") == date_str:
-        return "今日热闻"
-    else:
-        return date_str

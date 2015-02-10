@@ -3,9 +3,12 @@ version: 1
 
 cron:
 - description: crawl latest news
-  url: /operation/fetch_latest?secret=311521
-  schedule: "57 */1 * * *"
+  url: /operation/fetch?secret=311521
+  schedule: "50 */1 * * *"
 
+- description: index latest news
+  url: /operation/index?secret=311521
+  schedule: "55 */1 * * *"
 
 libraries:
 - name: "tornado"

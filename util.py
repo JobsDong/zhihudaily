@@ -4,7 +4,34 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import datetime
 from lxml import html
+
+
+def before_date_str(date_str):
+    """计算前一天的date_str
+    """
+    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    before_date = now_date - datetime.timedelta(days=1)
+    return before_date.strftime("%Y%m%d")
+
+
+def after_date_str(date_str):
+    """计算后一天的date_str
+    """
+    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    before_date = now_date + datetime.timedelta(days=1)
+    return before_date.strftime("%Y%m%d")
+
+
+def is_now_date(date_str):
+    if datetime.datetime.now().strftime("%Y%m%d") == date_str:
+        return True
+    else:
+        return False
+
+def now_date_str():
+    return datetime.datetime.now().strftime("%Y%m%d")
 
 
 def extract_text(content):
