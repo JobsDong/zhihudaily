@@ -4,7 +4,34 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import datetime
 from lxml import html
+
+
+def before_date_str(date_str):
+    """计算前一天的date_str
+    """
+    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    before_date = now_date - datetime.timedelta(days=1)
+    return before_date.strftime("%Y%m%d")
+
+
+def after_date_str(date_str):
+    """计算后一天的date_str
+    """
+    now_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    before_date = now_date + datetime.timedelta(days=1)
+    return before_date.strftime("%Y%m%d")
+
+
+def is_now_date(date_str):
+    if datetime.datetime.now().strftime("%Y%m%d") == date_str:
+        return True
+    else:
+        return False
+
+def now_date_str():
+    return datetime.datetime.now().strftime("%Y%m%d")
 
 
 def extract_text(content):
@@ -91,7 +118,9 @@ class SaeStorage(Storage):
         content = self._bucket.get_object_contents(self._fpath(name))
 
         def onclose_fn(sfile):
-            self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
+            new_content = sfile.file.getvalue()
+            if new_content != content:
+                self._bucket.put_object(self._fpath(name), new_content)
 
         return StructFile(BytesIO(content), name=name, onclose=onclose_fn)
 
@@ -124,9 +153,10 @@ class SaeStorage(Storage):
         self._bucket.delete_object(self._fpath(name))
 
     def rename_file(self, name, newname, safe=False):
-        if name not in self.list():
+        name_list = self.list()
+        if name not in name_list:
             raise NameError(name)
-        if safe and newname in self.list():
+        if safe and newname in name_list:
             raise NameError("File %r exists" % newname)
 
         content = self._bucket.get_object_contents(self._fpath(name))
@@ -166,7 +196,6 @@ def cached(expiration=60*30, key=None):
                                           str(args), str(kwargs))
 
             result = mc_client.get(mc_key)
-            print result
             if not result:
                 result = fn(*args, **kwargs)
 
