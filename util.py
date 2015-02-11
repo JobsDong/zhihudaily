@@ -118,7 +118,9 @@ class SaeStorage(Storage):
         content = self._bucket.get_object_contents(self._fpath(name))
 
         def onclose_fn(sfile):
-            self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
+            new_content = sfile.file.getvalue()
+            if new_content != content:
+                self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
 
         return StructFile(BytesIO(content), name=name, onclose=onclose_fn)
 
@@ -151,9 +153,10 @@ class SaeStorage(Storage):
         self._bucket.delete_object(self._fpath(name))
 
     def rename_file(self, name, newname, safe=False):
-        if name not in self.list():
+        name_list = self.list()
+        if name not in name_list:
             raise NameError(name)
-        if safe and newname in self.list():
+        if safe and newname in name_list:
             raise NameError("File %r exists" % newname)
 
         content = self._bucket.get_object_contents(self._fpath(name))
