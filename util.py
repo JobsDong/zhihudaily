@@ -120,7 +120,7 @@ class SaeStorage(Storage):
         def onclose_fn(sfile):
             new_content = sfile.file.getvalue()
             if new_content != content:
-                self._bucket.put_object(self._fpath(name), sfile.file.getvalue())
+                self._bucket.put_object(self._fpath(name), new_content)
 
         return StructFile(BytesIO(content), name=name, onclose=onclose_fn)
 
