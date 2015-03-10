@@ -76,10 +76,9 @@ class Connection(object):
 import os
 from threading import Lock
 from sae.storage import Bucket
-from whoosh.filedb.filestore import Storage
+from whoosh.filedb.filestore import Storage, RamStorage
 from whoosh.filedb.structfile import StructFile
 from whoosh.compat import BytesIO
-from whoosh.util import random_name
 
 
 class SaeStorage(Storage):
@@ -169,10 +168,8 @@ class SaeStorage(Storage):
         return self.locks[name]
 
     def temp_storage(self, name=None):
-        name = name or "%s.tmp" % random_name()
-        path = os.path.join(self.folder, name)
-        tempstore = SaeStorage(self.bucket_name, path)
-        return tempstore.create()
+        temp_store = RamStorage()
+        return temp_store.create()
 
 import pylibmc
 import config
