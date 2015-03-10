@@ -30,8 +30,8 @@ class Dao(object):
         self._max_idle_time = 30
         try:
             self.reconnect()
-        except Exception:
-            logging.error("Cannot connect to MySQL", exc_info=True)
+        except Exception, e:
+            logging.error("Cannot connect to MySQL", e)
 
     def exist(self, news_id):
         """判断news是否存在

@@ -46,52 +46,21 @@ class operation_route(object):
         return cls._operation_methods
 
 
-@operation_route(r"/operation/fetch_before")
-def fetch_before(params):
-    """下载某天的新闻，并保存
-
-    :param params:
-    :return:
-    """
-    if 'date' not in params:
-        raise OperationException("lack of param date")
-
-    date_str = params['date'][0]
-    zh = daily.ZhiHu()
-
-    # 获取最新的news_id列表
-    latest_news = zh.get_before_news(date_str)
-    news_ids = _extract_news_ids(latest_news)
-    date_str = _extract_date_str(latest_news)
-
-    # 找出数据库中没有的news_id列表
-    not_exists_news_ids = _not_exists_news_ids(date_str, news_ids)
-
-    # 获取news和下载图片
-    not_exists_news_ids.reverse()
-    wait_for_store_news_list = _get_news_list(not_exists_news_ids)
-
-    # 保存图片
-    wait_for_store_news_list = _store_images(wait_for_store_news_list, date_str)
-
-    # 保存news到数据库中
-    _store_news_list(wait_for_store_news_list)
-
-    # 创建索引
-    _index_news_list([wait_for_store_news['news'] for wait_for_store_news
-                      in wait_for_store_news_list])
-
-
-@operation_route(r"/operation/fetch_latest")
-def fetch_latest(params):
+@operation_route(r"/operation/fetch")
+def fetch(params):
     """下载最新的新闻（包括图片），并保存
 
     :return:
     """
     zh = daily.ZhiHu()
 
+    if 'date' not in params:
+        latest_news = zh.get_latest_news()
+    else:
+        date_str = params['date'][0]
+        latest_news = zh.get_before_news(date_str)
+
     # 获取最新的news_id列表
-    latest_news = zh.get_latest_news()
     latest_news_ids = _extract_news_ids(latest_news)
     date_str = _extract_date_str(latest_news)
 
@@ -100,7 +69,7 @@ def fetch_latest(params):
 
     # 获取news和下载图片
     not_exists_news_ids.reverse()
-    wait_for_store_news_list = _get_news_list(not_exists_news_ids)
+    wait_for_store_news_list = _fetch_news_list(not_exists_news_ids)
 
     # 保存图片
     wait_for_store_news_list = _store_images(wait_for_store_news_list, date_str)
@@ -108,9 +77,20 @@ def fetch_latest(params):
     # 保存news到数据库中
     _store_news_list(wait_for_store_news_list)
 
-    # 创建索引
-    _index_news_list([wait_for_store_news['news'] for wait_for_store_news
-                      in wait_for_store_news_list])
+
+@operation_route(r"/operation/index")
+def index(params):
+    """建立索引
+
+    :param params:
+    :return:
+    """
+    if 'date' not in params:
+        date_str = util.now_date_str()
+    else:
+        date_str = params['date'][0]
+    news_list = _get_news_list(date_str)
+    _index_news_list(news_list)
 
 
 def _not_exists_news_ids(date_str, latest_news_ids):
@@ -133,7 +113,7 @@ def _not_exists_news_ids(date_str, latest_news_ids):
     return not_exists_news_ids
 
 
-def _get_news_list(news_ids):
+def _fetch_news_list(news_ids):
     """获取所有的news，image信息
 
     :param news_ids:
@@ -161,13 +141,26 @@ def _get_news_list(news_ids):
 
 
 def _index_news_list(news_list):
-    from search import fts
+    import search
+    fts_indexer = search.FTSIndexer()
     news_docs = []
     for news in news_list:
         body_text = util.extract_text(news.get('body', ''))
-        news_docs.append(dict(news_id=news['id'], title=news['title'],
+        news_docs.append(dict(news_id=news['news_id'], title=news['title'],
                               content=body_text))
-    fts.add_many_docs(news_docs)
+    fts_indexer.add_many_docs(news_docs)
+
+
+def _get_news_list(date_str):
+    dao = database.Dao()
+    news_list = []
+    try:
+        wait_for_indexed_news_list = dao.select_news_list(date_str)
+        for news in wait_for_indexed_news_list:
+            news_list.append(dict(news_id=news[1], title=news[2], body=news[5]))
+        return news_list
+    finally:
+        dao.close()
 
 
 def _store_news_list(news_list):
@@ -256,7 +249,3 @@ def _extract_date_str(latest_news):
     :return:
     """
     return latest_news['date']
-
-
-if __name__ == "__main__":
-    fetch_latest(None)

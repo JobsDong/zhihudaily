@@ -46,7 +46,8 @@ class ZhiHu(object):
         content = self._do_http_request("/api/3/news/before/%s" % date_str)
         return json.loads(content)
 
-    def _decode_msg(self, msg):
+    @staticmethod
+    def _decode_msg(msg):
         if isinstance(msg, str):
             msg = unicode(msg, 'utf-8')
 
@@ -61,10 +62,10 @@ class ZhiHu(object):
 
             status = response.status
             if status / 100 == 2:
-                content = self._decode_msg(response.read())
+                content = ZhiHu._decode_msg(response.read())
             else:
                 msg = response.reason
-                error = self._decode_msg(response.read())
+                error = ZhiHu._decode_msg(response.read())
         except (httplib.HTTPException, socket.error, socket.timeout) as e:
             raise ZhiHuClientException(str(e))
         except Exception as e:
@@ -76,7 +77,3 @@ class ZhiHu(object):
             raise ZhiHuServiceException(status, msg, error)
 
         return content
-
-if __name__ == "__main__":
-    zh = ZhiHu()
-    print zh.get_latest_news()

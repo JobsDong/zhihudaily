@@ -45,12 +45,11 @@ class MarkFormatter(highlight.Formatter):
         return "<br>".join(formatted)
 
 
-class FTS(object):
+class FTSIndexer(object):
+    """专门用于建立索引
+    """
 
     def __init__(self, storage=default_storage):
-        self._fragmenter_maxchars = 70
-        self._fragmenter_surround = 70
-        self._formatter = MarkFormatter()
         schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(field_boost=2.0, analyzer=analyzer),
                         content=TEXT(analyzer=analyzer))
@@ -59,25 +58,9 @@ class FTS(object):
         else:
             self._ix = storage.create_index(schema=schema)
 
-        self._parser = MultifieldParser(["title", "content"], self._ix.schema)
-        self._searcher = self._ix.searcher()
-
-    def search(self, query_string, limit=10):
-        """搜索文件
-        """
-        # refresh searcher
-        self._searcher = self._searcher.refresh()
-        query_string = util.str2unicode(query_string)
-
-        query = self._parser.parse(query_string)
-        search_results = self._searcher.search(query, limit=limit)
-
-        # 设置highlight属性
-        search_results.formatter = self._formatter
-        search_results.fragmenter.maxchars = self._fragmenter_maxchars
-        search_results.fragmenter.surround = self._fragmenter_surround
-
-        return search_results
+    def clear(self):
+        writer = self._ix.writer()
+        writer.commit(mergetype=writing.CLEAR)
 
     def add_many_docs(self, news_list=None):
         """增加许多文件
@@ -101,22 +84,37 @@ class FTS(object):
 
             writer.commit()
 
-    def add_doc(self, news_id, title=None, content=None):
-        """增加文件
-        """
-        writer = self._ix.writer()
-        news_id = util.str2unicode(news_id)
-        title = util.str2unicode(title)
-        content = util.str2unicode(content)
-        writer.update_document(news_id=news_id, title=title,
-                               content=content)
-        writer.commit()
 
-    def clear(self):
-        writer = self._ix.writer()
-        writer.commit(mergetype=writing.CLEAR)
+class FTSSearcher(object):
+    """用于检索
+    """
+
+    def __init__(self, storage=default_storage):
+        self._fragmenter_maxchars = 70
+        self._fragmenter_surround = 70
+        self._formatter = MarkFormatter()
+        schema = Schema(news_id=ID(unique=True, stored=True),
+                        title=TEXT(field_boost=2.0, analyzer=analyzer),
+                        content=TEXT(analyzer=analyzer))
+        self._ix = storage.open_index(schema=schema)
+        self._parser = MultifieldParser(["title", "content"], self._ix.schema)
+        self._searcher = self._ix.searcher()
+
+    def search(self, query_string, limit=10):
+        """搜索文件
+        """
+        # refresh searcher
+        query_string = util.str2unicode(query_string)
+
+        query = self._parser.parse(query_string)
+        search_results = self._searcher.search(query, limit=limit)
+
+        # 设置highlight属性
+        search_results.formatter = self._formatter
+        search_results.fragmenter.maxchars = self._fragmenter_maxchars
+        search_results.fragmenter.surround = self._fragmenter_surround
+
+        return search_results
 
     def close(self):
         self._searcher.close()
-
-fts = FTS()
