@@ -15,7 +15,7 @@ Demo地址: http://zhihurewen.sinaapp.com
 
 2. 创建表结构::
 
-    CREATE TABLE IF NOT EXISTS `news` (
+	CREATE TABLE IF NOT EXISTS `news` (
     `id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `news_id` varchar(50) NOT NULL UNIQUE,
     `title` varchar(200) NOT NULL,
@@ -27,21 +27,21 @@ Demo地址: http://zhihurewen.sinaapp.com
     `image_public_url` varchar(100) NOT NULL
     ) DEFAULT CHARSET=utf8;
 
-    CREATE INDEX date_index USING BTREE ON `news`(`date`);
+	CREATE INDEX date_index USING BTREE ON `news`(`date`);
 
-    CREATE INDEX news_id_index USING BTREE ON `news`(`news_id`);
+	CREATE INDEX news_id_index USING BTREE ON `news`(`news_id`);
 
 3. 修改配置文件config.py::
 
-    # 密码(311521)的md5
+	# 密码(311521)的md5
     secret = "76a4cebbe7af10ffd169cd9494adcf2f"
-    # 修改debug模式中的数据库配置
+	# 修改debug模式中的数据库配置
     DB_HOST = "127.0.0.1"
-    DB_NAME = "daily"
-    DB_USER = "root"
-    DB_PASS = "root"
-    DB_PORT = 3306
-    MEMCACHE_HOST = "127.0.0.1"
+	DB_NAME = "daily"
+	DB_USER = "root"
+	DB_PASS = "root"
+	DB_PORT = 3306
+	MEMCACHE_HOST = "127.0.0.1"
 
 
 4. 运行::
@@ -94,17 +94,9 @@ SAE环境搭建
 	"http://localhost:{port}/operation/fetch?date=20140808&secret={secret}
 
 3. 本地测试环境，数据不会自动建立索引，可以手动启动建立索引
-    "http://localhost:{port}/operation/index?secret={secret}
+	"http://localhost:{port}/operation/index?secret={secret}
 
 4. 本地测试环境，对某一天建立索引
-    "http://localhost:{port}/opertion/index?date=20140808&secret={secret}
+	"http://localhost:{port}/opertion/index?date=20140808&secret={secret}
 
 5. sae中有定时任务Cron。每隔1小时，会采集最新数据并更新，可在config.yaml的cron修改
-
-6. TODO::
-
-    1. 性能优化 (完成)
-    2. 搜索功能 (完成)
-    3. 非引用zhihu.com ?
-    4. 测试
-    5. 日志输出优化

@@ -30,6 +30,7 @@ def is_now_date(date_str):
     else:
         return False
 
+
 def now_date_str():
     return datetime.datetime.now().strftime("%Y%m%d")
 

@@ -6,14 +6,15 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-from whoosh.analysis import LowercaseFilter, StopFilter, StemFilter
-from whoosh.analysis import Tokenizer, Token
-from whoosh.lang.porter import stem
-
 import urllib
 import urllib2
 import json
 import re
+import logging
+
+from whoosh.analysis import LowercaseFilter, StopFilter, StemFilter
+from whoosh.analysis import Tokenizer, Token
+from whoosh.lang.porter import stem
 
 from util import unicode2str
 
@@ -43,9 +44,9 @@ class SaeTokenizer(Tokenizer):
             try:
                 yield word['word'], start_pos, start_pos + len(word['word'])
                 start_pos += len(word['word'])
-            except Exception:
+            except Exception, e:
                 # sae analyzer unknown exception
-                pass
+                logging.warn('sae tokenizer error', e)
 
     def __call__(self, text, **kargs):
         words = self.cut(text)
