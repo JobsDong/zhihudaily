@@ -8,7 +8,7 @@ cron:
 
 - description: index latest news
   url: /operation/index?secret=311521
-  schedule: "55 */1 * * *"
+  schedule: "55 12,16,22 * * *"
 
 libraries:
 - name: "tornado"

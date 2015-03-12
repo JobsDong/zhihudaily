@@ -31,7 +31,9 @@ class Dao(object):
         try:
             self.reconnect()
         except Exception, e:
-            logging.error("Cannot connect to MySQL", e)
+            import traceback
+            stack = traceback.format_exc()
+            logging.error("Cannot connect to MySQL:%s\n%s" % (e, stack))
 
     def exist(self, news_id):
         """判断news是否存在

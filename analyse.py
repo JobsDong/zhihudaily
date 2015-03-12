@@ -46,7 +46,9 @@ class SaeTokenizer(Tokenizer):
                 start_pos += len(word['word'])
             except Exception, e:
                 # sae analyzer unknown exception
-                logging.warn('sae tokenizer error', e)
+                import traceback
+                stack = traceback.format_exc()
+                logging.error("sae tokenizer error:%s\n%s" % (e, stack))
 
     def __call__(self, text, **kargs):
         words = self.cut(text)
