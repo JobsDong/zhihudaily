@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
 """专门用于分词
 """
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
+
 
 import urllib
 import urllib2
@@ -16,7 +17,7 @@ from whoosh.analysis import LowercaseFilter, StopFilter, StemFilter
 from whoosh.analysis import Tokenizer, Token
 from whoosh.lang.porter import stem
 
-from util import unicode2str
+from utils.extract_util import unicode2str
 
 STOP_WORDS = frozenset(('a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'can',
                         'for', 'from', 'have', 'if', 'in', 'is', 'it', 'may',

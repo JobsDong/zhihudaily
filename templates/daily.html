@@ -5,7 +5,7 @@
 {% end %}
 
 {% block css %}
-<link rel="stylesheet" href="../static/css/day.css">
+<link rel="stylesheet" href="../static/css/daily.css">
 {% end %}
 
 {% block content %}
@@ -50,7 +50,9 @@
     {% if after_date is not None %}
     <a target="_self" href="/?date={{escape(after_date)}}" class="page-btn">后一天</a>
     {% end %}
+    {% if before_date is not None %}
     <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>
+    {% end %}
 </div>
 <!-- next end -->
 
