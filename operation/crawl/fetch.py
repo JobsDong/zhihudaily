@@ -1,110 +1,37 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
-"""运维操作
-"""
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import httplib
+import urlparse
 import traceback
 import logging
-import urlparse
 import hashlib
-import httplib
+import config
+import zhihu
+from daily.dao import DailyDao
+from search.whoosh_search import SAEFTSIndexer
+from utils.extract_util import extract_text
 
-from config import debug, IMAGE_BUCKET
-import daily
-import database
-import util
-
-if debug:
-    from util import Connection
-else:
-    from sae.storage import Connection
+from sae.storage import Connection
 
 
-class OperationException(Exception):
 
-    def __init__(self, msg):
-        super(OperationException, self).__init__(msg)
-
-
-class operation_route(object):
-    """operation的包装起
-    """
-
-    _operation_methods = {}
-
-    def __init__(self, uri):
-        self._uri = uri
-
-    def __call__(self, route_method):
-        self._operation_methods[self._uri] = route_method
-
-    @classmethod
-    def get_operation_routes(cls):
-        return cls._operation_methods
-
-
-@operation_route(r"/operation/fetch")
-def fetch(params):
-    """下载最新的新闻（包括图片），并保存
-
-    :return:
-    """
-    zh = daily.ZhiHu()
-
-    if 'date' not in params:
-        latest_news = zh.get_latest_news()
-    else:
-        date_str = params['date'][0]
-        latest_news = zh.get_before_news(date_str)
-
-    # 获取最新的news_id列表
-    latest_news_ids = _extract_news_ids(latest_news)
-    date_str = _extract_date_str(latest_news)
-
-    # 找出数据库中没有的news_id列表
-    not_exists_news_ids = _not_exists_news_ids(date_str, latest_news_ids)
-
-    # 获取news和下载图片
-    not_exists_news_ids.reverse()
-    wait_for_store_news_list = _fetch_news_list(not_exists_news_ids)
-
-    # 保存图片
-    wait_for_store_news_list = _store_images(wait_for_store_news_list, date_str)
-
-    # 保存news到数据库中
-    _store_news_list(wait_for_store_news_list)
-
-
-@operation_route(r"/operation/index")
-def index(params):
-    """建立索引
-
-    :param params:
-    :return:
-    """
-    if 'date' not in params:
-        date_str = util.now_date_str()
-    else:
-        date_str = params['date'][0]
-    news_list = _get_news_list(date_str)
-    _index_news_list(news_list)
-
-
-def _not_exists_news_ids(date_str, latest_news_ids):
+def not_exists_news_ids(date_str, latest_news_ids):
     """找出所有不存在的news_ids
 
     :param date_str:
     :param latest_news_ids:
     :return:
     """
-    dao = database.Dao()
+    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
+                   config.DB_PASS, config.DB_NAME)
     not_exists_news_ids = []
     try:
         exists_news_ids = [str(news[1]) for news
-                           in dao.select_news_list(date_str)]
+                           in dao.get_news_list(date_str)]
         for news_id in latest_news_ids:
             if str(news_id) not in exists_news_ids:
                 not_exists_news_ids.append(news_id)
@@ -113,13 +40,13 @@ def _not_exists_news_ids(date_str, latest_news_ids):
     return not_exists_news_ids
 
 
-def _fetch_news_list(news_ids):
+def fetch_news_list(news_ids):
     """获取所有的news，image信息
 
     :param news_ids:
     :return:
     """
-    zh = daily.ZhiHu()
+    zh = zhihu.ZhiHu()
 
     wait_for_store_news_list = []
     for news_id in news_ids:
@@ -140,22 +67,22 @@ def _fetch_news_list(news_ids):
     return wait_for_store_news_list
 
 
-def _index_news_list(news_list):
-    import search
-    fts_indexer = search.FTSIndexer()
+def index_news_list(news_list):
+    fts_indexer = SAEFTSIndexer(config.FS_BUCKET, config.INDEX_DIR)
     news_docs = []
     for news in news_list:
-        body_text = util.extract_text(news.get('body', ''))
+        body_text = extract_text(news.get('body', ''))
         news_docs.append(dict(news_id=news['news_id'], title=news['title'],
                               content=body_text))
     fts_indexer.add_many_docs(news_docs)
 
 
-def _get_news_list(date_str):
-    dao = database.Dao()
+def get_news_list(date_str):
+    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
+                   config.DB_PASS, config.DB_NAME)
     news_list = []
     try:
-        wait_for_indexed_news_list = dao.select_news_list(date_str)
+        wait_for_indexed_news_list = dao.get_news_list(date_str)
         for news in wait_for_indexed_news_list:
             news_list.append(dict(news_id=news[1], title=news[2], body=news[5]))
         return news_list
@@ -163,13 +90,14 @@ def _get_news_list(date_str):
         dao.close()
 
 
-def _store_news_list(news_list):
+def store_news_list(news_list):
     """将news_list保存到数据库中
 
     :param news_list:
     :return:
     """
-    dao = database.Dao()
+    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
+                   config.DB_PASS, config.DB_NAME)
     try:
         for news in news_list:
             dao.insert(news['public_image_url'],
@@ -179,7 +107,7 @@ def _store_news_list(news_list):
         dao.close()
 
 
-def _fetch_image(news_url, image_url):
+def fetch_image(news_url, image_url):
     """获取图片内容
 
     :param news_url:
@@ -201,7 +129,7 @@ def _fetch_image(news_url, image_url):
         return None, None
 
 
-def _store_images(news_list, date_str):
+def store_images(news_list, date_str):
     """保存images
 
     :param news_list:
@@ -217,8 +145,8 @@ def _store_images(news_list, date_str):
         image_url = a_news_copy.pop('image_url')
         # 保存image
         object_name = hashlib.md5(image_url).hexdigest()
-        con.put_object(IMAGE_BUCKET, object_name, image_data, image_type)
-        public_image_url = con.generate_url(IMAGE_BUCKET, object_name)
+        con.put_object(config.IMAGE_BUCKET, object_name, image_data, image_type)
+        public_image_url = con.generate_url(config.IMAGE_BUCKET, object_name)
 
         a_news_copy['public_image_url'] = public_image_url
         a_news_copy['date_str'] = date_str
@@ -227,7 +155,7 @@ def _store_images(news_list, date_str):
     return news_list_copy
 
 
-def _extract_news_ids(latest_news):
+def extract_news_ids(latest_news):
     """提取出最新的news_ids
 
     :param latest_news:
@@ -242,7 +170,7 @@ def _extract_news_ids(latest_news):
     return news_ids
 
 
-def _extract_date_str(latest_news):
+def extract_date_str(latest_news):
     """提取出最新的日期
 
     :param latest_news:

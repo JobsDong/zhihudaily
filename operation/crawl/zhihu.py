@@ -14,7 +14,7 @@ import json
 class ZhiHuServiceException(Exception):
 
     def __init__(self, status, msg, err):
-        self.args = (status, msg, err)
+        super(ZhiHuServiceException, self).__init__(status, msg, err)
         self.status = status
         self.msg = msg
         self.err = err
