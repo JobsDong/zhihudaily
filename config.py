@@ -14,14 +14,18 @@ static_path = os.path.join(os.path.dirname(__file__), "static")
 # template path
 template_path = os.path.join(os.path.dirname(__file__), "templates")
 
-# index path
+# sae fts search
 INDEX_DIR = 'dailyindex'
+# 索引,词典，idf文件保存的bucket name
+FS_BUCKET = "dailyfiles"
+
+# ali fts search
+ACCESS_KEY = "VcSjW6ARC9FAbGvI"
+ACCESS_SECRET = "e0wug6xFDBeYHAfofQdo0c2L0jPrzJ"
+
 
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
-
-# 索引,词典，idf文件保存的bucket name
-FS_BUCKET = "dailyfiles"
 
 # 密码(311521)的md5
 secret = "76a4cebbe7af10ffd169cd9494adcf2f"
