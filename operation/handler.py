@@ -34,6 +34,7 @@ class OperationHandler(BaseHandler):
                 else:
                     self.set_status(404)
                     self.write('{"code": 404, "msg": "no operation"}')
+                    return
             except Exception as e:
                 import traceback
                 stack = traceback.format_exc()

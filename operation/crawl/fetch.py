@@ -54,7 +54,7 @@ def fetch_news_list(news_ids):
             news = zh.get_news(news_id)
             # 下载图片
             image_url = news['image'] if 'image' in news else news['theme_image']
-            image_type, image_data = _fetch_image(news['share_url'], image_url)
+            image_type, image_data = fetch_image(news['share_url'], image_url)
 
             wait_for_store_news_list.append(dict(news=news,
                                                  image_type=image_type,

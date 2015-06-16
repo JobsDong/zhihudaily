@@ -24,9 +24,6 @@ class DailyHandler(BaseHandler):
         news_list = get_daily_news(date_str)
 
         # 如果日报为空，并且参数是今天，就用昨天的数据
-        if len(news_list) == 0 and date_str == today_str():
-            news_list = get_daily_news(yesterday_date_str(date_str))
-
         after_date_str = tomorrow_date_str(date_str) \
             if today_str() != date_str else None
 
