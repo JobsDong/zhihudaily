@@ -27,8 +27,6 @@ ACCESS_SECRET = "fake_secret"
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
 
-# 密码(311521)的md5
-secret = "76a4cebbe7af10ffd169cd9494adcf2f"
 
 import sae.const
 
@@ -38,3 +36,7 @@ DB_NAME = sae.const.MYSQL_DB
 DB_USER = sae.const.MYSQL_USER
 DB_PASS = sae.const.MYSQL_PASS
 DB_PORT = int(sae.const.MYSQL_PORT)
+
+# admin 帐号密码
+username = "admin"
+password = "admin"
