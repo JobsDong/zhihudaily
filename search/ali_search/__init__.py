@@ -4,15 +4,14 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import base64
+import json
 import datetime
 import re
-import time
 import hmac
 import hashlib
-import urlparse
 import urllib
-import json
-import random
+import uuid
 import requests
 from utils.extract_util import str2unicode, unicode2str
 
@@ -28,10 +27,10 @@ def _build_common_params(params, access_key):
     params.update({
         "Version": "v2",
         "AccessKeyId": access_key,
-        "Timestamp": datetime.datetime.utcnow().isoformat(),
-        "SignatureVersion": "1.0",
-        "SignatureNonce": "%s%s" % (time.ctime(), random.randint(0, 10000)),
+        "Timestamp": (datetime.datetime.now() + datetime.timedelta(hours=-8)).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "SignatureMethod": "HMAC-SHA1",
+        "SignatureVersion": "1.0",
+        "SignatureNonce": "%s" % str(uuid.uuid1()),
     })
 
     return params
@@ -42,27 +41,35 @@ def _signature(method, params, access_secret):
     sorted_keys = sorted(params.keys())
     signatures = []
     for key in sorted_keys:
-        signatures.append("%s=%s" % (urllib.urlencode(key), urllib.urlencode(params[key])))
+        signatures.append("%s=%s" % (key, _encode(params[key])))
     signature_str = "&".join(signatures)
     # 2.
-    string_2_sign = method.upper() + "&" + "%2F" + "&" + signature_str
+    string_2_sign = method.upper() + "&" + "%2F" + "&" + _encode(signature_str)
     # 3.
-    signature = hmac.new(access_secret + "&", msg=string_2_sign, digestmod=hashlib.sha1).digest()
+    signature = base64.b64encode(hmac.new(access_secret + "&", msg=string_2_sign.encode('utf-8'), digestmod=hashlib.sha1).digest())
     return signature
 
 
-def request(method, uri, access_key, access_secret, params=None, data=None, headers=None):
+def _encode(string):
+    if not isinstance(string, basestring):
+        string = str(string)
+
+    if isinstance(string, unicode):
+        string = str(string)
+
+    return urllib.quote_plus(string).replace('+', '%20').replace('*', '%%2A').replace('%7E', '~')
+
+
+def request(method, uri, access_key, access_secret, params=None, data=None):
     # 公共参数
     params = _build_common_params(params, access_key)
     signature = _signature(method, params, access_secret)
     params['Signature'] = signature
-
     try:
         if method.lower() == "get":
-            resp = requests.get(uri, params=params, headers=headers)
+            resp = requests.get(uri, params=params)
         else:
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
-            resp = requests.post(uri, params=params, data=data, headers=headers)
+            resp = requests.post(uri, params=params, data=data)
     except Exception as e:
         raise AliSearchError(e)
     else:
@@ -74,8 +81,6 @@ def request(method, uri, access_key, access_secret, params=None, data=None, head
                 raise AliSearchError('failed')
         else:
             return AliSearchError(code=resp.status_code, reason=resp.reason)
-
-
 
 
 class AliFTSIndexer(object):
@@ -102,8 +107,10 @@ class AliFTSIndexer(object):
             })
 
         # 发出请求
-        request("POSt", url, self._access_key,
-                self._access_secret, data=json.dumps(news_data))
+        request("POST", url, self._access_key,
+                self._access_secret, params={"action": "push",
+                                             "table_name": "news",
+                                             "items": json.dumps(news_data)})
 
     def clear(self):
         pass
@@ -122,18 +129,12 @@ class AliFTSSearcher(object):
         url = "%s/search" % self._uri
         query_string = unicode2str(query_string)
         words = re.compile("\s+").split(query_string)
-        strs = []
-        for word in words:
-            strs.append("content:'%s'" % word)
         # 构造参数
         params = {
-            "query": "config=hit:%s&&query=%s" % (limit, " OR ".join(strs)),
+            "query": "config=hit:%s&&query=%s" % (limit, " OR ".join(words)),
             "index_name": self._app,
-            "summary": {
-                "summary_field": "content",
-                "summary_element": "mark",
-                "summary_len": 70
-            }
+            "summary": "summary_field:content,summary_element:mark,"
+                       "summary_len:70",
         }
 
         # 请求

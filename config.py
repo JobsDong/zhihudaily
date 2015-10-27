@@ -20,8 +20,8 @@ INDEX_DIR = 'dailyindex'
 FS_BUCKET = "dailyfiles"
 
 # ali fts search
-ACCESS_KEY = "VcSjW6ARC9FAbGvI"
-ACCESS_SECRET = "e0wug6xFDBeYHAfofQdo0c2L0jPrzJ"
+ACCESS_KEY = "fake_key"
+ACCESS_SECRET = "fake_secret"
 
 
 # 图片存储的bucket name
