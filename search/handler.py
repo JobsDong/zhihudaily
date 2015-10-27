@@ -8,7 +8,7 @@ import config
 from base.handler import BaseHandler
 
 from daily.dao import DailyDao
-from whoosh_search import SAEFTSSearcher
+from search.ali_search import AliFTSSearcher
 
 
 class SearchHandler(BaseHandler):
@@ -29,7 +29,8 @@ class SearchHandler(BaseHandler):
 
 def search(keywords):
     hits = []
-    fts_searcher = SAEFTSSearcher(config.FS_BUCKET, config.INDEX_DIR)
+    fts_searcher = AliFTSSearcher(config.ALI_SEARCH_HOST, config.ALI_SEARCH_APP,
+                                  config.ACCESS_KEY, config.ACCESS_SECRET)
     results = fts_searcher.search(keywords, limit=10)
 
     db = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,

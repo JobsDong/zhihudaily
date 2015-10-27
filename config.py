@@ -4,9 +4,9 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import os
 
 debug = True
+import os
 
 # static path
 static_path = os.path.join(os.path.dirname(__file__), "static")
@@ -14,15 +14,11 @@ static_path = os.path.join(os.path.dirname(__file__), "static")
 # template path
 template_path = os.path.join(os.path.dirname(__file__), "templates")
 
-# sae fts search
-INDEX_DIR = 'dailyindex'
-# 索引,词典，idf文件保存的bucket name
-FS_BUCKET = "dailyfiles"
-
 # ali fts search
+ALI_SEARCH_HOST = "http://opensearch-cn-hangzhou.aliyuncs.com"
+ALI_SEARCH_APP = "zhihudaily"
 ACCESS_KEY = "fake_key"
 ACCESS_SECRET = "fake_secret"
-
 
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
