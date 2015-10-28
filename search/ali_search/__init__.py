@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -11,8 +11,8 @@ import re
 import hmac
 import hashlib
 import urllib
+import urllib2
 import uuid
-import requests
 from utils.extract_util import str2unicode, unicode2str
 
 
@@ -66,21 +66,23 @@ def request(method, uri, access_key, access_secret, params=None, data=None):
     signature = _signature(method, params, access_secret)
     params['Signature'] = signature
     try:
+        para_data = urllib.urlencode(params)
+
         if method.lower() == "get":
-            resp = requests.get(uri, params=params)
-        else:
-            resp = requests.post(uri, params=params, data=data)
+            uri = "%s?%s" % (uri, para_data)
+            para_data = None
+
+        f = urllib2.urlopen(uri, para_data)
+        resp = f.read()
+        f.close()
     except Exception as e:
         raise AliSearchError(e)
     else:
-        if resp.status_code / 100 == 2:
-            result = resp.json()
-            if result['status'] == 'OK':
-                return result
-            else:
-                raise AliSearchError('failed')
+        result = json.loads(resp)
+        if result['status'] == 'OK':
+            return result
         else:
-            return AliSearchError(code=resp.status_code, reason=resp.reason)
+            raise AliSearchError('failed')
 
 
 class AliFTSIndexer(object):

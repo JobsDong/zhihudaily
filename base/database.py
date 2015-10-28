@@ -21,7 +21,7 @@ class BaseDao(object):
         self._db = None
         self._db_args = dict(host=host, port=port,
                              user=user, passwd=passwd,
-                             db=db)
+                             db=db, charset='utf8')
         self._last_use_time = time.time()
         self._max_idle_time = 30
         try:

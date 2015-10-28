@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -16,7 +16,6 @@ from search.ali_search import AliFTSIndexer
 from utils.extract_util import extract_text
 
 from sae.storage import Connection
-
 
 
 def not_exists_news_ids(date_str, latest_news_ids):
