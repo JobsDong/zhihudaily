@@ -16,6 +16,12 @@ import uuid
 from utils.extract_util import str2unicode, unicode2str
 
 
+def _to_str(u):
+    if isinstance(u, unicode):
+        u = u.encode('utf8')
+    return u
+
+
 class AliSearchError(Exception):
     """
     """
@@ -136,16 +142,20 @@ class AliFTSSearcher(object):
             "query": "config=hit:%s&&query=%s" % (limit, " OR ".join(words)),
             "index_name": self._app,
             "summary": "summary_field:content,summary_element:mark,"
-                       "summary_len:70",
+                       "summary_len:300;summary_field:title,summary_element:mark",
         }
 
         # 请求
         r = request("GET", url, self._access_key, self._access_secret, params)
         results = []
         for item in r['result']['items']:
+            print item
             results.append({
-                "news_id": item['news_id'],
-                "title": item['title'],
-                "content": item['content'],
+                "news_id": _to_str(item['news_id']),
+                "title": _to_str(item['title']),
+                "content": _to_str(item['content']),
             })
         return results
+
+    def close(self):
+        pass

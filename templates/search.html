@@ -41,7 +41,7 @@
 
     <div class="col-md-9">
         <div class="row">
-            <div class="col-md-10 title text-left"><a href="{{ escape(hit['share_url']) }}">{{ escape(str(hit['title'])) }}</a></div>
+            <div class="col-md-10 title text-left"><a href="{{ escape(hit['share_url']) }}">{% raw hit['title'] %}</a></div>
             <div class="col-md-2 date text-right">{{ escape(hit['date'])}}</div>
         </div>
 

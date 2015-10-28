@@ -38,12 +38,13 @@ def search(keywords):
     try:
         for hit in results:
             news = db.get_news(hit['news_id'])
-            summary = hit['summary']
+            title = hit['title']
+            summary = hit['content']
             hits.append(dict(
                 image_public_url=news[8],
                 share_url=news[3],
                 date=news[4],
-                title=news[2],
+                title=title,
                 summary=summary,
             ))
     finally:
