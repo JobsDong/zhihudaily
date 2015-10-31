@@ -5,6 +5,7 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import config
+import logging
 from base.handler import BaseHandler
 from daily.dao import DailyDao
 from utils.date_util import today_str, yesterday_date_str, tomorrow_date_str
@@ -21,15 +22,22 @@ class DailyHandler(BaseHandler):
         date_str = self.get_argument("date", today_str())
 
         # 获取日报
-        news_list = get_daily_news(date_str)
+        try:
+            news_list = get_daily_news(date_str)
 
-        # 如果日报为空，并且参数是今天，就用昨天的数据
-        after_date_str = tomorrow_date_str(date_str) \
-            if today_str() != date_str else None
-
-        self.render("daily.html", news_list=news_list,
-                    before_date=yesterday_date_str(date_str),
-                    after_date=after_date_str)
+            before_date_str = yesterday_date_str(date_str)
+            after_date_str = tomorrow_date_str(date_str) \
+                if today_str() != date_str else None
+        except Exception as e:
+            import traceback
+            stack = traceback.format_exc()
+            logging.error("get daily news failed date_str:%s error:%s cause:%s"
+                          % (date_str, e, stack))
+            self.write_error(404, reason="Invalidate date {%s}" % date_str)
+        else:
+            self.render("daily.html", news_list=news_list,
+                        before_date=before_date_str,
+                        after_date=after_date_str)
 
 
 def get_daily_news(date_str):

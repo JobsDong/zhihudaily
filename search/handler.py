@@ -5,6 +5,7 @@
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import config
+import logging
 from base.handler import BaseHandler
 
 from daily.dao import DailyDao
@@ -22,9 +23,16 @@ class SearchHandler(BaseHandler):
         if not keywords.strip():
             self.redirect("/")
             return
-
-        hits = search(keywords)
-        self.render("search.html", hits=hits, keywords=keywords)
+        try:
+            hits = search(keywords)
+        except Exception as e:
+            import traceback
+            stack = traceback.format_exc()
+            logging.error("Search error, keywords:{%s}, error:%s\nstack:%s" %
+                          (keywords, e, stack))
+            self.write_error(500)
+        else:
+            self.render("search.html", hits=hits, keywords=keywords)
 
 
 def search(keywords):
