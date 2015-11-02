@@ -14,7 +14,7 @@ from crawl import fetch
 
 
 class OperationHandler(BaseHandler):
-    """clean data
+    """后台操作的接口
     """
 
     def get(self, *args, **kwargs):
@@ -48,8 +48,6 @@ class OperationHandler(BaseHandler):
 
 def fetch_zhihu_daiy(params):
     """下载最新的新闻（包括图片），并保存
-
-    :return:
     """
     zh = zhihu.ZhiHu()
 
@@ -79,13 +77,11 @@ def fetch_zhihu_daiy(params):
 
 def index_zhihu_daily(params):
     """建立索引
-
-    :param params:
-    :return:
     """
     if 'date' not in params:
         date_str = today_str()
     else:
         date_str = params['date'][0]
     news_list = fetch.get_news_list(date_str)
-    fetch.index_news_list(news_list)
+    if news_list:
+        fetch.index_news_list(news_list)
