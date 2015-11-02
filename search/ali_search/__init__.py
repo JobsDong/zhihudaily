@@ -17,8 +17,7 @@ from utils.extract_util import str2unicode, unicode2str
 
 
 class AliSearchError(Exception):
-    """
-    """
+    pass
 
 
 def _build_common_params(params, access_key):
@@ -140,11 +139,12 @@ class AliFTSSearcher(object):
         self._access_key = access_key
         self._access_secret = access_secret
 
-    def search(self, query_string, limit=10):
+    def search(self, query_string, start=0, limit=10):
         """关键词搜索
 
         Args:
           query_string: str or unicode 搜索关键词
+          start: int 起始位置
           limit: int 最大个数
 
         Returns:
@@ -160,7 +160,7 @@ class AliFTSSearcher(object):
         words = re.compile("\s+").split(query_string)
         # 构造参数
         params = {
-            "query": "config=hit:%s&&query=%s" % (limit, " OR ".join(words)),
+            "query": "config=start:%s,hit:%s&&query=%s" % (start, limit, " OR ".join(words)),
             "index_name": self._app,
             "summary": "summary_field:content,summary_element:mark,"
                        "summary_len:300;summary_field:title,summary_element:mark",
@@ -169,13 +169,31 @@ class AliFTSSearcher(object):
         # 请求
         r = request("GET", url, self._access_key, self._access_secret, params)
         results = []
+        total_count = int(r['result']['total'])
         for item in r['result']['items']:
             results.append({
                 "news_id": unicode2str(item['news_id']),
                 "title": unicode2str(item['title']),
                 "content": unicode2str(item['content']),
             })
-        return results
+        return LazyCollection(results, total_count)
 
     def close(self):
         pass
+
+
+class LazyCollection(object):
+
+    def __init__(self, object_list, total_count):
+        self.object_list = object_list
+        self.total_count = total_count
+
+    def __len__(self):
+        return len(self.object_list)
+
+    def __getitem__(self, index):
+        if not isinstance(index, (slice,) + (int, long)):
+            raise TypeError
+        if not isinstance(self.object_list, list):
+            self.object_list = list(self.object_list)
+        return self.object_list[index]

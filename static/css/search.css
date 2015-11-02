@@ -6,6 +6,36 @@
     font-size: 20px;
 }
 
+.page {
+	text-align: center;
+	padding: 10px 0 30px;
+	white-space: nowrap;
+	font-size: 12px;
+}
+
+.page a, .page span {
+	display: inline-block;
+	padding: 1px 11px;
+	height: 24px;
+	line-height: 24px;
+	text-decoration: none;
+	vertical-align: middle;
+}
+
+.page a:hover {
+	text-decoration: none;
+	border: 1px solid #ddd;
+	padding: 0 10px;
+}
+
+.page a.cur {
+	color:#232323;
+}
+
+.page span {
+    cursor: default;
+}
+
 .item {
     height: 215px;
     position: relative;

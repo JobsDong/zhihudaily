@@ -6,10 +6,15 @@ __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
 import config
 import logging
+import traceback
 from base.handler import BaseHandler
+from utils.pagination_util import Paginator, InvalidPageError
 
 from daily.dao import DailyDao
-from search.ali_search import AliFTSSearcher
+from search.ali_search import AliFTSSearcher, AliSearchError
+
+
+SEARCH_PER_PAGE = 10
 
 
 class SearchHandler(BaseHandler):
@@ -20,30 +25,60 @@ class SearchHandler(BaseHandler):
 
     def get(self, *args, **kwargs):
         keywords = self.get_argument("keywords", "")
+        page = self.get_argument("page", 1)
         if not keywords.strip():
             self.redirect("/")
             return
+
+        if not is_validate_number(page):
+            self.write_error(400, reason="not validate page number")
+            return
+
+        page = int(page)
         try:
-            hits = search(keywords)
-        except Exception as e:
-            import traceback
+            total_count, hit_list = search(keywords, page * SEARCH_PER_PAGE,
+                                           SEARCH_PER_PAGE)
+            hits = Paginator(hit_list, page, total_count, SEARCH_PER_PAGE)
+
+        except (AliSearchError, InvalidPageError)as e:
             stack = traceback.format_exc()
-            logging.error("Search error, keywords:{%s}, error:%s\nstack:%s" %
-                          (keywords, e, stack))
+            logging.error("Search keywords{%s} page:{%s} error:%s\n stack:%s"
+                          % (keywords, page, e, stack))
             self.write_error(500)
         else:
             self.render("search.html", hits=hits, keywords=keywords)
 
 
-def search(keywords):
-    hits = []
+def is_validate_number(number):
+    try:
+        number = int(number)
+    except (TypeError, ValueError):
+        return False
+    if number < 1:
+        return False
+    return True
+
+
+def search(keywords, start, limit):
+    """搜索接口
+
+    Argumenst:
+      keywords: 关键词语
+      start: 开始位置
+      limit: 返回个数
+
+    Returns:
+      tuple: (total_count, results)
+    """
     fts_searcher = AliFTSSearcher(config.ALI_SEARCH_HOST, config.ALI_SEARCH_APP,
                                   config.ACCESS_KEY, config.ACCESS_SECRET)
-    results = fts_searcher.search(keywords, limit=10)
 
     db = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
                   config.DB_PASS, config.DB_NAME)
     try:
+        hits = []
+        results = fts_searcher.search(keywords, start=start, limit=limit)
+
         for hit in results:
             news = db.get_news(hit['news_id'])
             title = hit['title']
@@ -55,8 +90,8 @@ def search(keywords):
                 title=title,
                 summary=summary,
             ))
+
+        return results.total_count, hits
     finally:
         db.close()
         fts_searcher.close()
-
-    return hits

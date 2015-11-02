@@ -49,6 +49,20 @@
     </div>
 </div>
 {% end %}
+
+<div class="page">
+    <span class="step-links">
+    {% if hits.has_previous %}
+        <a href="?page={{ hits.previous_page_number }}&&keywords={{ keywords }}">上一页</a>
+    {% end %}
+
+        <span class="current">{{ hits.cur_page }}</span>
+
+    {% if hits.has_next %}
+        <a href="?page={{ hits.next_page_number }}&&keywords={{ keywords }}">下一页</a>
+    {% end %}
+    </span>
+</div>
 {% end %}
 <!-- search result end -->
 
