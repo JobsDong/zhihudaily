@@ -22,13 +22,12 @@ class OperationHandler(BaseHandler):
         if auth_header is None or not auth_header.startswith("Basic"):
             return False
 
-        auth_encoded = base64.decodestring(auth_header)
-        username, password = auth_encoded.split(":", 2)
+        auth_decoded = base64.decodestring(auth_header[6:])
+        username, password = auth_decoded.split(":", 2)
         if username == config.username and password == config.password:
             return True
 
         return False
-
 
     def get(self, *args, **kwargs):
         # auth
