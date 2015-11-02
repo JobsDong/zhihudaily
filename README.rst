@@ -17,17 +17,17 @@ SAE环境搭建
 3. 修改配置文件config.py::
 
 	# 用户名/密码
-    username = "admin"
-    password = "admin"
+	username = "admin"
+	password = "admin"
 
 	# 图片存储的bucket name
 	IMAGE_BUCKET = "dailyimage"
 
 	# ali open search host, app , access_key, access_secret
-    ALI_SEARCH_HOST = "http://opensearch-cn-hangzhou.aliyuncs.com"
-    ALI_SEARCH_APP = "zhihudaily"
-    ACCESS_KEY = "fake_key"
-    ACCESS_SECRET = "fake_secret"
+	ALI_SEARCH_HOST = "http://opensearch-cn-hangzhou.aliyuncs.com"
+	ALI_SEARCH_APP = "zhihudaily"
+	ACCESS_KEY = "fake_key"
+	ACCESS_SECRET = "fake_secret"
 
 4. 启动Storage服务，并创建1个Bucket(IMAGE_BUCKET)
 
