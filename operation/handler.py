@@ -4,8 +4,8 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import hashlib
 import logging
+import base64
 import config
 from base.handler import BaseHandler
 from utils.date_util import today_str
@@ -17,13 +17,25 @@ class OperationHandler(BaseHandler):
     """后台操作的接口
     """
 
+    def is_authenticated(self):
+        auth_header = self.request.headers.get('Authorization')
+        if auth_header is None or not auth_header.startswith("Basic"):
+            return False
+
+        auth_encoded = base64.decodestring(auth_header)
+        username, password = auth_encoded.split(":", 2)
+        if username == config.username and password == config.password:
+            return True
+
+        return False
+
+
     def get(self, *args, **kwargs):
-        secret = self.get_argument("secret", "")
-        m = hashlib.md5()
-        m.update(secret)
-        if m.hexdigest() != config.secret:
-            self.set_status(403)
-            self.write('{"code": 403, "msg": "secret wrong"}')
+        # auth
+        if not self.is_authenticated():
+            self.set_status(401)
+            self.set_header('WWW-Authenticate', "Basic realm=Restricted")
+            self.finish()
         else:
             path = self.request.path
             try:
@@ -34,7 +46,6 @@ class OperationHandler(BaseHandler):
                 else:
                     self.set_status(404)
                     self.write('{"code": 404, "msg": "no operation"}')
-                    return
             except Exception as e:
                 import traceback
                 stack = traceback.format_exc()
