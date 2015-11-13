@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -12,11 +12,10 @@ import hashlib
 import config
 import zhihu
 from daily.dao import DailyDao
-from search.whoosh_search import SAEFTSIndexer
+from search.ali_search import AliFTSIndexer
 from utils.extract_util import extract_text
 
 from sae.storage import Connection
-
 
 
 def not_exists_news_ids(date_str, latest_news_ids):
@@ -68,7 +67,8 @@ def fetch_news_list(news_ids):
 
 
 def index_news_list(news_list):
-    fts_indexer = SAEFTSIndexer(config.FS_BUCKET, config.INDEX_DIR)
+    fts_indexer = AliFTSIndexer(config.ALI_SEARCH_HOST, config.ALI_SEARCH_APP,
+                                config.ACCESS_KEY, config.ACCESS_SECRET)
     news_docs = []
     for news in news_list:
         body_text = extract_text(news.get('body', ''))

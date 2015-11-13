@@ -1,18 +1,11 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """知乎日报
 """
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import os
-import sys
-
-root = os.path.dirname(__file__)
-
-# 两者取其一
-sys.path.insert(0, os.path.join(root, 'site-packages'))
 
 import config
 import sae

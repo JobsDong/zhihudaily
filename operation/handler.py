@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import hashlib
 import logging
+import base64
 import config
 from base.handler import BaseHandler
 from utils.date_util import today_str
@@ -14,16 +14,27 @@ from crawl import fetch
 
 
 class OperationHandler(BaseHandler):
-    """clean data
+    """后台操作的接口
     """
 
+    def is_authenticated(self):
+        auth_header = self.request.headers.get('Authorization')
+        if auth_header is None or not auth_header.startswith("Basic"):
+            return False
+
+        auth_decoded = base64.decodestring(auth_header[6:])
+        username, password = auth_decoded.split(":", 2)
+        if username == config.username and password == config.password:
+            return True
+
+        return False
+
     def get(self, *args, **kwargs):
-        secret = self.get_argument("secret", "")
-        m = hashlib.md5()
-        m.update(secret)
-        if m.hexdigest() != config.secret:
-            self.set_status(403)
-            self.write('{"code": 403, "msg": "secret wrong"}')
+        # auth
+        if not self.is_authenticated():
+            self.set_status(401)
+            self.set_header('WWW-Authenticate', "Basic realm=Restricted")
+            self.finish()
         else:
             path = self.request.path
             try:
@@ -34,7 +45,6 @@ class OperationHandler(BaseHandler):
                 else:
                     self.set_status(404)
                     self.write('{"code": 404, "msg": "no operation"}')
-                    return
             except Exception as e:
                 import traceback
                 stack = traceback.format_exc()
@@ -48,8 +58,6 @@ class OperationHandler(BaseHandler):
 
 def fetch_zhihu_daiy(params):
     """下载最新的新闻（包括图片），并保存
-
-    :return:
     """
     zh = zhihu.ZhiHu()
 
@@ -79,13 +87,11 @@ def fetch_zhihu_daiy(params):
 
 def index_zhihu_daily(params):
     """建立索引
-
-    :param params:
-    :return:
     """
     if 'date' not in params:
         date_str = today_str()
     else:
         date_str = params['date'][0]
     news_list = fetch.get_news_list(date_str)
-    fetch.index_news_list(news_list)
+    if news_list:
+        fetch.index_news_list(news_list)

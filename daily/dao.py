@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
@@ -20,7 +20,7 @@ class DailyDao(BaseDao):
         """
         cursor = self._cursor()
         try:
-            cursor.execute("SELECT * FROM news WHERE date=%s "
+            cursor.execute("SELECT * FROM newses WHERE date=%s "
                            "ORDER BY id DESC", [date_str])
             news = cursor.fetchall()
             return news
@@ -32,7 +32,7 @@ class DailyDao(BaseDao):
         """
         cursor = self._cursor()
         try:
-            cursor.execute("SELECT * FROM news WHERE news_id=%s", [news_id])
+            cursor.execute("SELECT * FROM newses WHERE news_id=%s", [news_id])
             news = cursor.fetchone()
             return news
         finally:
@@ -40,11 +40,6 @@ class DailyDao(BaseDao):
 
     def insert(self, public_image_url, date_str, news):
         """插入一条新闻
-
-        :param public_image_url:
-        :param date_str:
-        :param news:
-        :return:
         """
         cursor = self._cursor()
         try:
@@ -53,7 +48,7 @@ class DailyDao(BaseDao):
             image_source = news.get('image_source', '') \
                            or news.get('theme_name', '')
 
-            cursor.execute("INSERT INTO news (news_id, title, share_url, "
+            cursor.execute("INSERT INTO newses (news_id, title, share_url, "
                            "date, body, image, image_source, image_public_url) "
                            "VALUES "
                            "(%s, %s, %s, %s, %s, %s, %s, %s)",

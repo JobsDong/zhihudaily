@@ -41,7 +41,7 @@
 
     <div class="col-md-9">
         <div class="row">
-            <div class="col-md-10 title text-left"><a href="{{ escape(hit['share_url']) }}">{{ escape(str(hit['title'])) }}</a></div>
+            <div class="col-md-10 title text-left"><a href="{{ escape(hit['share_url']) }}">{% raw hit['title'] %}</a></div>
             <div class="col-md-2 date text-right">{{ escape(hit['date'])}}</div>
         </div>
 
@@ -49,6 +49,20 @@
     </div>
 </div>
 {% end %}
+
+<div class="page">
+    <span class="step-links">
+    {% if hits.has_previous %}
+        <a href="?page={{ hits.previous_page_number }}&&keywords={{ keywords }}">上一页</a>
+    {% end %}
+
+        <span class="current">{{ hits.cur_page }}</span>
+
+    {% if hits.has_next %}
+        <a href="?page={{ hits.next_page_number }}&&keywords={{ keywords }}">下一页</a>
+    {% end %}
+    </span>
+</div>
 {% end %}
 <!-- search result end -->
 
