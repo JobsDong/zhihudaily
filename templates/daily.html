@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>知乎日报 - 满足你的好奇心</title>
+{% end %}
+
+{% block css %}
+<link rel="stylesheet" href="../static/css/daily.css">
+{% end %}
+
+{% block content %}
+
+<div style="margin-top: 40px;" class="row"></div>
+
+<!-- search button start -->
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <form action="/search" method="get" target="_self">
+            <div class="input-group">
+                <input type="search" name="keywords" class="form-control input-lg" placeholder="search">
+                <span class="input-group-btn">
+                    <button class="btn btn-lg btn-default" type="submit">Go!</button>
+                </span>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- search button end -->
+
+<!-- features start -->
+<div class="row features">
+    {% for news in news_list %}
+    <div class="col-md-4">
+        <div href="{{ escape(news['share_url']) }}" class="feature">
+            <div class="mask"></div>
+            <img src="{{ escape(news['image_public_url']) }}" alt="{{ escape(news['image_source']) }}">
+            <a href="{{ escape(news['share_url']) }}">
+                <h3>{{ escape(news['title']) }}</h3>
+            </a>
+        </div>
+    </div>
+    {% end %}
+</div>
+<!-- feature end -->
+
+<div style="margin-top: 40px;" class="row"></div>
+
+<!-- next start -->
+<div class="row next">
+    {% if after_date is not None %}
+    <a target="_self" href="/?date={{escape(after_date)}}" class="page-btn">后一天</a>
+    {% end %}
+    {% if before_date is not None %}
+    <a target="_self" href="/?date={{escape(before_date)}}" class="page-btn">前一天</a>
+    {% end %}
+</div>
+<!-- next end -->
+
+{% end %}
