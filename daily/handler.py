@@ -9,6 +9,7 @@ import logging
 from base.handler import BaseHandler
 from daily.dao import DailyDao
 from utils.date_util import today_str, yesterday_date_str, tomorrow_date_str
+from utils.cache_util import cached
 
 
 class DailyHandler(BaseHandler):
@@ -40,6 +41,7 @@ class DailyHandler(BaseHandler):
                         after_date=after_date_str)
 
 
+@cached(expiration=60*10)
 def get_daily_news(date_str):
     """获取日报信息
     """

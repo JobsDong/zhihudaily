@@ -9,6 +9,7 @@ import logging
 import traceback
 from base.handler import BaseHandler
 from utils.pagination_util import Paginator, InvalidPageError
+from utils.cache_util import cached
 
 from daily.dao import DailyDao
 from search.ali_search import AliFTSSearcher, AliSearchError
@@ -59,6 +60,7 @@ def is_validate_number(number):
     return True
 
 
+@cached(expiration=60*60)
 def search(keywords, start, limit):
     """搜索接口
 
