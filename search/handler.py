@@ -12,7 +12,7 @@ from utils.pagination_util import Paginator, InvalidPageError
 from utils.cache_util import cached
 
 from daily.dao import DailyDao
-from search.ali_search import AliFTSSearcher, AliSearchError
+from search.fts_search import FTSSearcher, FTSSearchError
 
 
 SEARCH_PER_PAGE = 10
@@ -41,7 +41,7 @@ class SearchHandler(BaseHandler):
                                            SEARCH_PER_PAGE)
             hits = Paginator(hit_list, page, total_count, SEARCH_PER_PAGE)
 
-        except (AliSearchError, InvalidPageError)as e:
+        except (FTSSearchError, InvalidPageError)as e:
             stack = traceback.format_exc()
             logging.error("Search keywords{%s} page:{%s} error:%s\n stack:%s"
                           % (keywords, page, e, stack))
@@ -64,7 +64,7 @@ def is_validate_number(number):
 def search(keywords, start, limit):
     """搜索接口
 
-    Argumenst:
+    Arguments:
       keywords: 关键词语
       start: 开始位置
       limit: 返回个数
@@ -72,8 +72,7 @@ def search(keywords, start, limit):
     Returns:
       tuple: (total_count, results)
     """
-    fts_searcher = AliFTSSearcher(config.ALI_SEARCH_HOST, config.ALI_SEARCH_APP,
-                                  config.ACCESS_KEY, config.ACCESS_SECRET)
+    fts_searcher = FTSSearcher()
 
     db = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
                   config.DB_PASS, config.DB_NAME)

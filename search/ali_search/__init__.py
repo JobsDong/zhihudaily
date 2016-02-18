@@ -15,9 +15,7 @@ import urllib2
 import uuid
 from utils.extract_util import str2unicode, unicode2str
 
-
-class AliSearchError(Exception):
-    pass
+from search.fts_search import FTSSearcher, FTSSearchError, LazyCollection
 
 
 def _build_common_params(params, access_key):
@@ -79,34 +77,25 @@ def request(method, uri, access_key, access_secret, params=None):
         resp = f.read()
         f.close()
     except Exception as e:
-        raise AliSearchError("request search server failed", e)
+        raise FTSSearchError("request search server failed", e)
     else:
         result = json.loads(resp)
         if result['status'] == 'OK':
             return result
         else:
-            raise AliSearchError('result status is not ok result:%s' % resp)
+            raise FTSSearchError('result status is not ok result:%s' % resp)
 
 
-class AliFTSIndexer(object):
+class AliFTSSearcher(FTSSearcher):
 
     def __init__(self, uri, app, access_key, access_secret):
         self._uri = uri
         self._app = app
         self._access_key = access_key
         self._access_secret = access_secret
+        super(self, AliFTSSearcher).__init__()
 
     def add_many_docs(self, news_list=None):
-        """增加文档如索引
-
-        Args:
-          news_list: 需要增加的文档，格式如:[{"news_id": 23, "title": "人民",
-                                        "content": "民主"}, {}]
-
-        Raises:
-          AliSearchError: 如果发生错误
-
-        """
         # 构造url
         url = "%s/index/doc/%s" % (self._uri, self._app)
         # 构造内容
@@ -127,33 +116,7 @@ class AliFTSIndexer(object):
                                              "table_name": "news",
                                              "items": json.dumps(news_data)})
 
-    def clear(self):
-        pass
-
-
-class AliFTSSearcher(object):
-
-    def __init__(self, uri, app, access_key, access_secret):
-        self._uri = uri
-        self._app = app
-        self._access_key = access_key
-        self._access_secret = access_secret
-
     def search(self, query_string, start=0, limit=10):
-        """关键词搜索
-
-        Args:
-          query_string: str or unicode 搜索关键词
-          start: int 起始位置
-          limit: int 最大个数
-
-        Returns:
-          results: [] 形式如下:[{"news_id": 23, "title": "<mark>中国</mark>公惨淡",
-                            "content": "<mark>中国</mark>人民名住..."}, {...}]
-
-        Raises:
-          AliSearchError: 如果搜索发生错误
-        """
         # 构造uri
         url = "%s/search" % self._uri
         query_string = unicode2str(query_string)
@@ -178,22 +141,8 @@ class AliFTSSearcher(object):
             })
         return LazyCollection(results, total_count)
 
-    def close(self):
+    def clear(self):
         pass
 
-
-class LazyCollection(object):
-
-    def __init__(self, object_list, total_count):
-        self.object_list = object_list
-        self.total_count = total_count
-
-    def __len__(self):
-        return len(self.object_list)
-
-    def __getitem__(self, index):
-        if not isinstance(index, (slice,) + (int, long)):
-            raise TypeError
-        if not isinstance(self.object_list, list):
-            self.object_list = list(self.object_list)
-        return self.object_list[index]
+    def close(self):
+        pass

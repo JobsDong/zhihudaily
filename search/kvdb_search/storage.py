@@ -6,98 +6,78 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-
-import os
 from threading import Lock
-import sae.kvdb
-from whoosh.filedb.filestore import Storage
+from whoosh.filedb.filestore import Storage, RamStorage
 from whoosh.filedb.structfile import StructFile
 from whoosh.compat import BytesIO
-from whoosh.util import random_name
+
+import sae.kvdb
+
+
+class LockError(Exception):
+    pass
 
 
 class SaeStorage(Storage):
     """实现存储在SAE上的Storage
     """
 
-    def __init__(self, path):
-        self.folder = path
+    def __init__(self, name):
+        self.name = name
         self._client = sae.kvdb.Client()
         self.locks = {}
-
-    def __repr__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.folder)
 
     def create(self):
         return self
 
-    def destroy(self):
-        # Remove all files
-        self.clean()
-        # REMOVE locks
-        del self.locks
+    def destroy(self, *args, **kwargs):
+        f_names = self.list()
+        for f_name in f_names:
+            self._client.delete("%s%s" % (self.name, f_name))
 
-    def create_file(self, name, **kwargs):
+    def create_file(self, name):
         def onclose_fn(sfile):
-            self._client.set(self._fpath(name), sfile.file.getvalue())
+            self._client.set("%s%s" % (self.name, name), sfile.file.getvalue())
 
         f = StructFile(BytesIO(), name=name, onclose=onclose_fn)
         return f
 
-    def open_file(self, name, **kwargs):
-        content = self._client.get(self._fpath(name))
-        if content is None:
-            raise NameError(name)
-
-        def onclose_fn(sfile):
-            self._client.replace(self._fpath(name), sfile.file.getvalue())
-
-        return StructFile(BytesIO(content), name=name, onclose=onclose_fn)
-
-    def _fpath(self, fname):
-        return os.path.join(self.folder, fname)
-
-    def clean(self):
-        files = self.list()
-        for fname in files:
-            self._client.delete(self._fpath(fname))
+    def open_file(self, name, *args, **kwargs):
+        return StructFile(self._client.get("%s%s" % (self.name, name)))
 
     def list(self):
-        file_generate = self._client.getkeys_by_prefix(prefix=self._fpath(""))
-        file_names = []
-        for f in file_generate:
-            file_names.append(f['name'][len(self.folder)+1:])
-        return file_names
+        key_generator = self._client.getkeys_by_prefix(self.name)
+        keys = []
+        for f in key_generator:
+            keys.append(f.replace(self.name, ""))
+
+        return keys
 
     def file_exists(self, name):
-        return name in self.list()
+        return self._client.get("%s%s" % (self.name, name)) is not None
 
     def file_modified(self, name):
-        return ''
+        return -1
 
     def file_length(self, name):
-        pass
+        return len(self._client.get("%s%s" % (self.name, name)))
 
     def delete_file(self, name):
-        self._client.delete(self._fpath(name))
+        return self._client.delete("%s%s" % (self.name, name))
 
-    def rename_file(self, name, newname, safe=False):
-        if name not in self.list():
-            raise NameError(name)
-        if safe and newname in self.list():
-            raise NameError("File %r exists" % newname)
-
-        content = self._client.get(self._fpath(name))
-        self._client.delete(self._fpath(name))
-        self._client.set(self._fpath(newname), content)
+    def rename_file(self, name, new_name, safe=False):
+        v = self._client.get("%s%s" % (self.name, name))
+        self._client.set("%s%s" % (self.name, new_name), v)
+        self._client.delete("%s%s" % (self.name, name))
 
     def lock(self, name):
         if name not in self.locks:
             self.locks[name] = Lock()
         return self.locks[name]
 
+    def close(self):
+        self._client.disconnect_all()
+
     def temp_storage(self, name=None):
-        name = name or "%s.tmp" % random_name()
-        path = os.path.join(self.folder, name)
-        tempstore = SaeStorage(path)
-        return tempstore.create()
+        temp_store = RamStorage()
+        return temp_store.create()
