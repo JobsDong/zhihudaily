@@ -36,12 +36,14 @@ class MarkFormatter(highlight.Formatter):
 
 class KvdbFTSSearcher(FTSSearcher):
 
-    def __init__(self, name):
+    name = None
+
+    def __init__(self):
         self._fragmenter_maxchars = 70
         self._fragmenter_surround = 70
         self._formatter = MarkFormatter()
         sae_analyzer = SaeAnalyzer()
-        sae_storage = SaeStorage(name)
+        sae_storage = SaeStorage(self.name)
         schema = Schema(news_id=ID(unique=True, stored=True),
                         title=TEXT(field_boost=2.0, analyzer=sae_analyzer),
                         content=TEXT(analyzer=sae_analyzer))

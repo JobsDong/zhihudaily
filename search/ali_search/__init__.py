@@ -88,16 +88,14 @@ def request(method, uri, access_key, access_secret, params=None):
 
 class AliFTSSearcher(FTSSearcher):
 
-    def __init__(self, uri, app, access_key, access_secret):
-        self._uri = uri
-        self._app = app
-        self._access_key = access_key
-        self._access_secret = access_secret
-        super(self, AliFTSSearcher).__init__()
+    uri = None
+    app = None
+    access_key = None
+    access_secret = None
 
     def add_many_docs(self, news_list=None):
         # 构造url
-        url = "%s/index/doc/%s" % (self._uri, self._app)
+        url = "%s/index/doc/%s" % (self.uri, self.app)
         # 构造内容
         news_data = []
         for news in news_list:
@@ -111,26 +109,27 @@ class AliFTSSearcher(FTSSearcher):
             })
 
         # 发出请求
-        request("POST", url, self._access_key,
-                self._access_secret, params={"action": "push",
-                                             "table_name": "news",
-                                             "items": json.dumps(news_data)})
+        request("POST", url, self.access_key,
+                self.access_secret, params={"action": "push",
+                                            "table_name": "news",
+                                            "items": json.dumps(news_data)})
 
     def search(self, query_string, start=0, limit=10):
+        print self.access_secret
         # 构造uri
-        url = "%s/search" % self._uri
+        url = "%s/search" % self.uri
         query_string = unicode2str(query_string)
         words = re.compile("\s+").split(query_string)
         # 构造参数
         params = {
             "query": "config=start:%s,hit:%s&&query=%s" % (start, limit, " OR ".join(words)),
-            "index_name": self._app,
+            "index_name": self.app,
             "summary": "summary_field:content,summary_element:mark,"
                        "summary_len:300;summary_field:title,summary_element:mark",
         }
 
         # 请求
-        r = request("GET", url, self._access_key, self._access_secret, params)
+        r = request("GET", url, self.access_key, self.access_secret, params)
         results = []
         total_count = int(r['result']['total'])
         for item in r['result']['items']:

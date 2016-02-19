@@ -33,11 +33,12 @@ class FTSSearcher(object):
         cls._impl_kwargs = kwargs
 
     def __new__(cls, **kwargs):
-        init_kwargs = {}
-        init_kwargs.update(kwargs)
         impl = cls._impl_class
+        init_kwargs = cls._impl_kwargs
+        instance = super(FTSSearcher, cls).__new__(impl)
+        for n, v in init_kwargs.items():
+            setattr(instance, n, v)
 
-        instance = super(FTSSearcher, cls).__new__(impl, init_kwargs)
         return instance
 
     def search(self, query_string, start=0, limit=10):
