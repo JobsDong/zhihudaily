@@ -115,7 +115,6 @@ class AliFTSSearcher(FTSSearcher):
                                             "items": json.dumps(news_data)})
 
     def search(self, query_string, start=0, limit=10):
-        print self.access_secret
         # 构造uri
         url = "%s/search" % self.uri
         query_string = unicode2str(query_string)

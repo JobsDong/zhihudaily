@@ -60,7 +60,7 @@ def is_validate_number(number):
     return True
 
 
-@cached(expiration=60*60)
+@cached(expiration=60*10)
 def search(keywords, start, limit):
     """搜索接口
 
