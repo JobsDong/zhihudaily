@@ -16,7 +16,7 @@ from whoosh import highlight
 
 from search.kvdb_search.analyse import SaeAnalyzer
 from search.kvdb_search.storage import SaeStorage
-from search.fts_search import FTSSearcher
+from search.fts_search import FTSSearcher, LazyCollection
 from utils.extract_util import str2unicode
 
 
@@ -60,13 +60,25 @@ class KvdbFTSSearcher(FTSSearcher):
         query_string = str2unicode(query_string)
         query = self._parser.parse(query_string)
         search_results = searcher.search(query, limit=start+limit)
+        total_count = len(search_results)
         search_results = search_results[start:start+limit]
 
         # 设置highlight属性
         search_results.formatter = self._formatter
         search_results.fragmenter.maxchars = self._fragmenter_maxchars
         search_results.fragmenter.surround = self._fragmenter_surround
-        return search_results
+
+        results = []
+        for hit in search_results:
+            text = hit["content"]
+            summary = hit.highlights("content", text=text, top=2)
+            results.append({
+                "news_id": hit["news_id"],
+                "title": hit["title"],
+                "content": summary,
+            })
+
+        return LazyCollection(results, total_count)
 
     def add_many_docs(self, news_list=None):
         if news_list:

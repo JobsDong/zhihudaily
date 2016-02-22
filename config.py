@@ -39,11 +39,11 @@ password = "admin"
 from search.fts_search import FTSSearcher
 
 # ali fts searcher
-FTSSearcher.configure("search.ali_search.AliFTSSearcher",
-                      uri="http://opensearch-cn-hangzhou.aliyuncs.com",
-                      app="zhihudaily", access_key="fake_key",
-                      access_secret="fake_secret")
+# FTSSearcher.configure("search.ali_search.AliFTSSearcher",
+#                       uri="http://opensearch-cn-hangzhou.aliyuncs.com",
+#                       app="zhihudaily", access_key="fake_key",
+#                       access_secret="fake_secret")
 
 # sae kvdb fts searcher
-# FTSSearcher.configure("search.kvdb_search.KvdbFTSSearcher",
-#                       name="zhihudaily")
+FTSSearcher.configure("search.kvdb_search.KvdbFTSSearcher",
+                      name="zhihudaily")
