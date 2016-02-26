@@ -6,16 +6,93 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
+import os
+import json
+import time
 from threading import Lock
-from whoosh.filedb.filestore import Storage, RamStorage
+from whoosh.filedb.filestore import Storage
 from whoosh.filedb.structfile import StructFile
-from whoosh.compat import BytesIO
+from whoosh.util import random_name
+from io import BytesIO
+from StringIO import StringIO
 
 import sae.kvdb
 
+MAX_VALUE_LENGTH = 1048576
+DELIMITER = "_block_"
 
-class LockError(Exception):
-    pass
+
+class KVDBCollection(object):
+
+    def __init__(self, fpath):
+        self.fpath = fpath
+        self.kvdb = sae.kvdb.KVClient()
+
+    def _fpath(self, name):
+        return os.path.join(self.fpath, name)
+
+    def exists(self, name):
+        return self.kvdb.get(self._fpath(name)) is not None
+
+    def list(self):
+        keys = self.kvdb.getkeys_by_prefix(self.fpath)
+        if len(keys) == 0:
+            return []
+        else:
+            fnames = []
+            for key in keys:
+                if DELIMITER not in key:
+                    fnames.append(key.replace("%s" % self.fpath, ""))
+            return fnames
+
+    def delete(self, name):
+        keys = self.kvdb.getkeys_by_prefix(os.path.join(self._fpath(name)))
+        for key in keys:
+            self.kvdb.delete(key)
+
+    def last_modified(self, name):
+        stat_json = json.loads(self.kvdb.get(self._fpath(name)))
+        return stat_json["timestamp"]
+
+    def length(self, name):
+        stat_json = json.loads(self.kvdb.get(self._fpath(name)))
+        return stat_json["bytes"]
+
+    def _block_generator(self, content):
+        while True:
+            data = content.read(MAX_VALUE_LENGTH)
+            if not data:
+                break
+            yield data
+
+    def set_value(self, name, value):
+        timestamp = time.time()
+        length = len(value)
+
+        # content
+        content = StringIO(value)
+        block_paths = []
+        for index, block in enumerate(self._block_generator(content)):
+            block_path = os.path.join(self._fpath(name), DELIMITER, index)
+            self.kvdb.set(block_path, block)
+            block_paths.append(block_path)
+
+        # stat
+        self.kvdb.set(self._fpath(name), json.dumps({"timestamp": timestamp,
+                                                     "bytes": length,
+                                                     "blocks": block_paths}))
+
+    def get_value(self, name):
+        stat_json = json.loads(self.kvdb.get(self._fpath(name)))
+        blocks = stat_json['blocks']
+        data = ''
+        for block_path in blocks:
+            data += self.kvdb.get(block_path)
+
+        return data
+
+    def close(self):
+        self.kvdb.disconnect_all()
 
 
 class SaeStorage(Storage):
@@ -24,51 +101,64 @@ class SaeStorage(Storage):
 
     def __init__(self, name):
         self.name = name
-        self._client = sae.kvdb.Client()
+        self.kvdb_coll = KVDBCollection(name)
         self.locks = {}
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.name)
 
     def create(self):
         return self
 
     def destroy(self, *args, **kwargs):
-        f_names = self.list()
-        for f_name in f_names:
-            self._client.delete("%s%s" % (self.name, f_name))
+        # remove all files
+        self.clean()
+        # remove locks
+        del self.locks
 
-    def create_file(self, name):
+    def create_file(self, fname):
         def onclose_fn(sfile):
-            self._client.set("%s%s" % (self.name, name), sfile.file.getvalue())
+            self.kvdb_coll.set_value(fname, sfile.file.getvalue())
 
-        f = StructFile(BytesIO(), name=name, onclose=onclose_fn)
+        f = StructFile(BytesIO(), name=fname, onclose=onclose_fn)
         return f
 
-    def open_file(self, name, *args, **kwargs):
-        return StructFile(self._client.get("%s%s" % (self.name, name)))
+    def open_file(self, fname, *args, **kwargs):
+        if not self.kvdb_coll.exists(fname):
+            raise NameError(fname)
+
+        content = self.kvdb_coll.get_value(fname)
+
+        def onclose_fn(sfile):
+            self.kvdb_coll.set_value(fname, sfile.file.getvalue())
+
+        return StructFile(BytesIO(content), name=fname, onclose=onclose_fn)
+
+    def clean(self):
+        fnames = self.list()
+        for fname in fnames:
+            self.kvdb_coll.delete(fname)
 
     def list(self):
-        key_generator = self._client.getkeys_by_prefix(self.name)
-        keys = []
-        for f in key_generator:
-            keys.append(f.replace(self.name, ""))
-
-        return keys
+        fnames = self.kvdb_coll.list()
+        return fnames
 
     def file_exists(self, name):
-        return self._client.get("%s%s" % (self.name, name)) is not None
+        return self.kvdb_coll.exists(name)
 
     def file_modified(self, name):
-        return -1
+        return self.kvdb_coll.last_modified(name)
 
     def file_length(self, name):
-        return len(self._client.get("%s%s" % (self.name, name)))
+        return self.kvdb_coll.length(name)
 
     def delete_file(self, name):
-        return self._client.delete("%s%s" % (self.name, name))
+        self.kvdb_coll.delete(name)
 
     def rename_file(self, name, new_name, safe=False):
-        v = self._client.get("%s%s" % (self.name, name))
-        self._client.set("%s%s" % (self.name, new_name), v)
-        self._client.delete("%s%s" % (self.name, name))
+        content = self.kvdb_coll.get_value(name)
+        self.kvdb_coll.delete(name)
+        self.kvdb_coll.set_value(new_name, content)
 
     def lock(self, name):
         if name not in self.locks:
@@ -76,8 +166,9 @@ class SaeStorage(Storage):
         return self.locks[name]
 
     def close(self):
-        self._client.disconnect_all()
+        self.kvdb_coll.close()
 
     def temp_storage(self, name=None):
-        temp_store = RamStorage()
+        name = name or "%s.tmp" % random_name()
+        temp_store = SaeStorage(name)
         return temp_store.create()

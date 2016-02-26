@@ -61,12 +61,12 @@ class KvdbFTSSearcher(FTSSearcher):
         query = self._parser.parse(query_string)
         search_results = searcher.search(query, limit=start+limit)
         total_count = len(search_results)
-        search_results = search_results[start:start+limit]
-
         # 设置highlight属性
         search_results.formatter = self._formatter
         search_results.fragmenter.maxchars = self._fragmenter_maxchars
         search_results.fragmenter.surround = self._fragmenter_surround
+
+        search_results = search_results[start:start+limit]
 
         results = []
         for hit in search_results:
