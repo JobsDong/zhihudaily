@@ -13,8 +13,8 @@ from threading import Lock
 from whoosh.filedb.filestore import Storage
 from whoosh.filedb.structfile import StructFile
 from whoosh.util import random_name
-from io import BytesIO
 from StringIO import StringIO
+from utils.extract_util import unicode2str
 
 import sae.kvdb
 
@@ -25,10 +25,11 @@ DELIMITER = "_block_"
 class KVDBCollection(object):
 
     def __init__(self, fpath):
-        self.fpath = fpath
+        self.fpath = unicode2str(fpath)
         self.kvdb = sae.kvdb.KVClient()
 
     def _fpath(self, name):
+        name = unicode2str(name)
         return os.path.join(self.fpath, name)
 
     def exists(self, name):
@@ -36,13 +37,14 @@ class KVDBCollection(object):
 
     def list(self):
         keys = self.kvdb.getkeys_by_prefix(self.fpath)
+        keys = list(keys)
         if len(keys) == 0:
             return []
         else:
             fnames = []
             for key in keys:
                 if DELIMITER not in key:
-                    fnames.append(key.replace("%s" % self.fpath, ""))
+                    fnames.append(key.replace("%s/" % self.fpath, ""))
             return fnames
 
     def delete(self, name):
@@ -73,7 +75,7 @@ class KVDBCollection(object):
         content = StringIO(value)
         block_paths = []
         for index, block in enumerate(self._block_generator(content)):
-            block_path = os.path.join(self._fpath(name), DELIMITER, index)
+            block_path = "%s%s%s" % (self._fpath(name), DELIMITER, index)
             self.kvdb.set(block_path, block)
             block_paths.append(block_path)
 
@@ -85,11 +87,12 @@ class KVDBCollection(object):
     def get_value(self, name):
         stat_json = json.loads(self.kvdb.get(self._fpath(name)))
         blocks = stat_json['blocks']
-        data = ''
+        data = StringIO()
         for block_path in blocks:
-            data += self.kvdb.get(block_path)
-
-        return data
+            block_path = unicode2str(block_path)
+            data.write(self.kvdb.get(block_path))
+        value = data.getvalue()
+        return value
 
     def close(self):
         self.kvdb.disconnect_all()
@@ -116,11 +119,11 @@ class SaeStorage(Storage):
         # remove locks
         del self.locks
 
-    def create_file(self, fname):
+    def create_file(self, fname, *args, **kwargs):
         def onclose_fn(sfile):
-            self.kvdb_coll.set_value(fname, sfile.file.getvalue())
-
-        f = StructFile(BytesIO(), name=fname, onclose=onclose_fn)
+            value = sfile.file.getvalue()
+            self.kvdb_coll.set_value(fname, value)
+        f = StructFile(StringIO(), name=fname, onclose=onclose_fn)
         return f
 
     def open_file(self, fname, *args, **kwargs):
@@ -130,9 +133,10 @@ class SaeStorage(Storage):
         content = self.kvdb_coll.get_value(fname)
 
         def onclose_fn(sfile):
-            self.kvdb_coll.set_value(fname, sfile.file.getvalue())
+            value = sfile.file.getvalue()
+            self.kvdb_coll.set_value(fname, value)
 
-        return StructFile(BytesIO(content), name=fname, onclose=onclose_fn)
+        return StructFile(StringIO(content), name=fname, onclose=onclose_fn)
 
     def clean(self):
         fnames = self.list()

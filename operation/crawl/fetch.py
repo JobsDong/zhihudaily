@@ -75,12 +75,15 @@ def fetch_news_list(news_ids):
 
 def index_news_list(news_list):
     fts_indexer = FTSSearcher()
-    news_docs = []
-    for news in news_list:
-        body_text = extract_text(news.get('body', ''))
-        news_docs.append(dict(news_id=news['news_id'], title=news['title'],
-                              content=body_text))
-    fts_indexer.add_many_docs(news_docs)
+    try:
+        news_docs = []
+        for news in news_list:
+            body_text = extract_text(news.get('body', ''))
+            news_docs.append(dict(news_id=news['news_id'], title=news['title'],
+                                  content=body_text))
+        fts_indexer.add_many_docs(news_docs)
+    finally:
+        fts_indexer.close()
 
 
 def get_news_list(date_str):

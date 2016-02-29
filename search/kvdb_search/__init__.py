@@ -45,8 +45,9 @@ class KvdbFTSSearcher(FTSSearcher):
         sae_analyzer = SaeAnalyzer()
         sae_storage = SaeStorage(self.name)
         schema = Schema(news_id=ID(unique=True, stored=True),
-                        title=TEXT(field_boost=2.0, analyzer=sae_analyzer),
-                        content=TEXT(analyzer=sae_analyzer))
+                        title=TEXT(field_boost=2.0, analyzer=sae_analyzer,
+                                   stored=True),
+                        content=TEXT(analyzer=sae_analyzer, stored=True))
 
         if sae_storage.index_exists():
             self._ix = sae_storage.open_index(schema=schema)
@@ -57,6 +58,7 @@ class KvdbFTSSearcher(FTSSearcher):
     def search(self, query_string, start=0, limit=10):
         # refresh searcher
         searcher = self._ix.searcher()
+        searcher.refresh()
         query_string = str2unicode(query_string)
         query = self._parser.parse(query_string)
         search_results = searcher.search(query, limit=start+limit)

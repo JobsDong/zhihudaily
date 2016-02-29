@@ -9,7 +9,6 @@ import logging
 import traceback
 from base.handler import BaseHandler
 from utils.pagination_util import Paginator, InvalidPageError
-from utils.cache_util import cached
 
 from daily.dao import DailyDao
 from search.fts_search import FTSSearcher, FTSSearchError
@@ -37,7 +36,7 @@ class SearchHandler(BaseHandler):
 
         page = int(page)
         try:
-            total_count, hit_list = search(keywords, page * SEARCH_PER_PAGE,
+            total_count, hit_list = search(keywords, (page-1) * SEARCH_PER_PAGE,
                                            SEARCH_PER_PAGE)
             hits = Paginator(hit_list, page, total_count, SEARCH_PER_PAGE)
 
@@ -60,7 +59,6 @@ def is_validate_number(number):
     return True
 
 
-@cached(expiration=60*10)
 def search(keywords, start, limit):
     """搜索接口
 
