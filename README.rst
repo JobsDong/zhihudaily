@@ -16,12 +16,12 @@ SAE环境搭建
 
 3. 修改配置文件config.py::
 
-	# 用户名/密码
-	username = "admin"
-	password = "admin"
+    # 用户名/密码
+    username = "admin"
+    password = "admin"
 
-	# 图片存储的bucket name
-	IMAGE_BUCKET = "dailyimage"
+    # 图片存储的bucket name
+    IMAGE_BUCKET = "dailyimage"
 
     # 配置搜索引擎（基于kvdb, whoosh）默认kvdbsearcher
     from search.fts_search import FTSSearcher
