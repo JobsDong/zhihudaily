@@ -57,34 +57,34 @@ class KvdbFTSSearcher(FTSSearcher):
 
     def search(self, query_string, start=0, limit=10):
         # refresh searcher
-        searcher = self._ix.searcher()
-        searcher.refresh()
-        query_string = str2unicode(query_string)
-        query = self._parser.parse(query_string)
-        search_results = searcher.search(query, limit=start+limit)
-        total_count = len(search_results)
-        # 设置highlight属性
-        search_results.formatter = self._formatter
-        search_results.fragmenter.maxchars = self._fragmenter_maxchars
-        search_results.fragmenter.surround = self._fragmenter_surround
+        with self._ix.searcher() as searcher:
+            query_string = str2unicode(query_string)
+            query = self._parser.parse(query_string)
+            search_results = searcher.search(query, limit=start+limit)
 
-        search_results = search_results[start:start+limit]
+            total_count = len(search_results)
+            # 设置highlight属性
+            search_results.formatter = self._formatter
+            search_results.fragmenter.maxchars = self._fragmenter_maxchars
+            search_results.fragmenter.surround = self._fragmenter_surround
 
-        results = []
-        for hit in search_results:
-            text = hit["content"]
-            summary = hit.highlights("content", text=text, top=2)
-            results.append({
-                "news_id": hit["news_id"],
-                "title": hit["title"],
-                "content": summary,
-            })
+            search_results = search_results[start:start+limit]
 
-        return LazyCollection(results, total_count)
+            results = []
+            for hit in search_results:
+                text = hit["content"]
+                summary = hit.highlights("content", text=text, top=2)
+                results.append({
+                    "news_id": hit["news_id"],
+                    "title": hit["title"],
+                    "content": summary,
+                })
+
+            return LazyCollection(results, total_count)
 
     def add_many_docs(self, news_list=None):
         if news_list:
-            writer = self._ix.writer()
+            writer = self._ix.writer(multisegment=True)
             for news in news_list:
                 try:
                     news_id = str2unicode(news['news_id'])

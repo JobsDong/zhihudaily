@@ -41,6 +41,18 @@ class Paginator(collections.Sequence):
             self.object_list = list(self.object_list)
         return self.object_list[index]
 
+    def previous_pages(self, limit=3):
+
+        page_indexs = [self.cur_page-i for i in xrange(1, limit)
+                       if self.cur_page-i >= 1]
+        page_indexs.reverse()
+        return page_indexs
+
+    def next_pages(self, limit=3):
+        page_indexs = [self.cur_page+i for i in xrange(1, limit)
+                       if self.cur_page+i <= self.num_pages]
+        return page_indexs
+
     @property
     def has_previous(self):
         return self.cur_page > 1

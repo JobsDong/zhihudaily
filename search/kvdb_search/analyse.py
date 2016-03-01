@@ -15,11 +15,12 @@ import urllib2
 import json
 import re
 
-STOP_WORDS = frozenset(('a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'can',
-                        'for', 'from', 'have', 'if', 'in', 'is', 'it', 'may',
-                        'not', 'of', 'on', 'or', 'tbd', 'that', 'the', 'this',
-                        'to', 'us', 'we', 'when', 'will', 'with', 'yet',
-                        'you', 'your', u'的', u'了', u'和'))
+STOP_WORDS = frozenset((u'一些', u'一切', u'万一', u'不仅', u'不但', u'不管',
+                        u'为了', u'于是', u'从此', u'从而', u'以为', u'但是',
+                        u'你', u'我', u'他', u'例如', u'关于', u'即使', u'反而',
+                        u'另外', u'只有', u'只是', u'可以', u'呀', u'吧', u'吗',
+                        u'否则', u'和', u'哪些', u'因为', u'尽管', u'的', u'了',
+                        u'和'))
 
 accepted_chars = re.compile(ur"[\u4E00-\u9FA5]+")
 
