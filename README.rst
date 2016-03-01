@@ -23,7 +23,7 @@ SAE环境搭建
     # 图片存储的bucket name
     IMAGE_BUCKET = "dailyimage"
 
-    # 配置搜索引擎（基于kvdb, whoosh）默认kvdbsearcher
+    # 配置搜索引擎（基于kvdb, whoosh）由于sae的kvdb有分钟配额限制，数据量稍大就会被禁止
     from search.fts_search import FTSSearcher
     FTSSearcher.configure("search.kvdb_search.KvdbFTSSearcher",
                       name="zhihudaily")

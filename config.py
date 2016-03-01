@@ -44,6 +44,6 @@ from search.fts_search import FTSSearcher
 #                       app="zhihudaily", access_key="fake_key",
 #                       access_secret="fake_secret")
 
-# sae kvdb fts searcher
+# sae kvdb fts searcher (由于sae的kvdb有分钟配额限制，数据量稍大就会被禁止,不建议使用)
 FTSSearcher.configure("search.kvdb_search.KvdbFTSSearcher",
                       name="zhihudaily")
