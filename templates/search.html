@@ -56,7 +56,15 @@
         <a href="?page={{ hits.previous_page_number }}&&keywords={{ keywords }}">上一页</a>
     {% end %}
 
+    {% for page_index in hits.previous_pages() %}
+        <a href="?page={{ page_index }}&&keywords={{ keywords }}">{{ page_index }}</a>
+    {% end %}
+
         <span class="current">{{ hits.cur_page }}</span>
+    {% for page_index in hits.next_pages() %}
+        <a href="?page={{ page_index }}&&keywords={{ keywords }}">{{ page_index }}</a>
+    {% end %}
+
 
     {% if hits.has_next %}
         <a href="?page={{ hits.next_page_number }}&&keywords={{ keywords }}">下一页</a>

@@ -12,7 +12,7 @@ import hashlib
 import config
 import zhihu
 from daily.dao import DailyDao
-from search.ali_search import AliFTSIndexer
+from search.fts_search import FTSSearcher
 from utils.extract_util import extract_text
 
 from sae.storage import Connection
@@ -21,9 +21,12 @@ from sae.storage import Connection
 def not_exists_news_ids(date_str, latest_news_ids):
     """找出所有不存在的news_ids
 
-    :param date_str:
-    :param latest_news_ids:
-    :return:
+    Args:
+      date_str: 日期 %Y%m%d
+      latest_news_ids: 最新的news_ids
+
+    Returns:
+      list: not_exists_news_ids
     """
     dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
                    config.DB_PASS, config.DB_NAME)
@@ -42,8 +45,12 @@ def not_exists_news_ids(date_str, latest_news_ids):
 def fetch_news_list(news_ids):
     """获取所有的news，image信息
 
-    :param news_ids:
-    :return:
+    Args:
+      news_ids: 需要采集的newsid
+
+    Returns:
+      wait_for_store_news_list: 需要保存的news列表
+
     """
     zh = zhihu.ZhiHu()
 
@@ -67,14 +74,16 @@ def fetch_news_list(news_ids):
 
 
 def index_news_list(news_list):
-    fts_indexer = AliFTSIndexer(config.ALI_SEARCH_HOST, config.ALI_SEARCH_APP,
-                                config.ACCESS_KEY, config.ACCESS_SECRET)
-    news_docs = []
-    for news in news_list:
-        body_text = extract_text(news.get('body', ''))
-        news_docs.append(dict(news_id=news['news_id'], title=news['title'],
-                              content=body_text))
-    fts_indexer.add_many_docs(news_docs)
+    fts_indexer = FTSSearcher()
+    try:
+        news_docs = []
+        for news in news_list:
+            body_text = extract_text(news.get('body', ''))
+            news_docs.append(dict(news_id=news['news_id'], title=news['title'],
+                                  content=body_text))
+        fts_indexer.add_many_docs(news_docs)
+    finally:
+        fts_indexer.close()
 
 
 def get_news_list(date_str):
@@ -92,9 +101,6 @@ def get_news_list(date_str):
 
 def store_news_list(news_list):
     """将news_list保存到数据库中
-
-    :param news_list:
-    :return:
     """
     dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
                    config.DB_PASS, config.DB_NAME)
@@ -109,10 +115,6 @@ def store_news_list(news_list):
 
 def fetch_image(news_url, image_url):
     """获取图片内容
-
-    :param news_url:
-    :param image_url:
-    :return:
     """
     _, host_port, path, _, _ = urlparse.urlsplit(image_url)
     host_port = host_port.split(":")
@@ -131,10 +133,6 @@ def fetch_image(news_url, image_url):
 
 def store_images(news_list, date_str):
     """保存images
-
-    :param news_list:
-    :param date_str:
-    :return:
     """
     con = Connection()
     news_list_copy = []
@@ -157,9 +155,6 @@ def store_images(news_list, date_str):
 
 def extract_news_ids(latest_news):
     """提取出最新的news_ids
-
-    :param latest_news:
-    :return:
     """
     news_ids = []
 
@@ -172,8 +167,5 @@ def extract_news_ids(latest_news):
 
 def extract_date_str(latest_news):
     """提取出最新的日期
-
-    :param latest_news:
-    :return:
     """
     return latest_news['date']

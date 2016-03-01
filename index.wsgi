@@ -6,9 +6,9 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-
-import config
 import sae
+sae.add_vendor_dir("vendor")
+import config
 
 import tornado.wsgi
 from base.handler import ErrorHandler

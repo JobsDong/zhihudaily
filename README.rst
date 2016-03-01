@@ -12,22 +12,28 @@ SAE环境搭建
 
 1. 申请sae账户，并且创建python应用
 
-2. 启动MySQL, Memcache服务，并创建数据库和表结构
+2. 启动MySQL, Memcache服务, KVDB服务，并创建数据库和表结构
 
 3. 修改配置文件config.py::
 
-	# 用户名/密码
-	username = "admin"
-	password = "admin"
+    # 用户名/密码
+    username = "admin"
+    password = "admin"
 
-	# 图片存储的bucket name
-	IMAGE_BUCKET = "dailyimage"
+    # 图片存储的bucket name
+    IMAGE_BUCKET = "dailyimage"
 
-	# ali open search host, app , access_key, access_secret
-	ALI_SEARCH_HOST = "http://opensearch-cn-hangzhou.aliyuncs.com"
-	ALI_SEARCH_APP = "zhihudaily"
-	ACCESS_KEY = "fake_key"
-	ACCESS_SECRET = "fake_secret"
+    # 配置搜索引擎（基于kvdb, whoosh）由于sae的kvdb有分钟配额限制，数据量稍大就会被禁止
+    from search.fts_search import FTSSearcher
+    FTSSearcher.configure("search.kvdb_search.KvdbFTSSearcher",
+                      name="zhihudaily")
+
+    # 基于Ali open search,
+    # FTSSearcher.configure("search.ali_search.AliFTSSearcher",
+    #                       uri="http://opensearch-cn-hangzhou.aliyuncs.com",
+    #                       app="zhihudaily", access_key="fake_key",
+    #                       access_secret="fake_secret")
+
 
 4. 启动Storage服务，并创建1个Bucket(IMAGE_BUCKET)
 
