@@ -16,6 +16,16 @@ SAE环境搭建
 
 3. 修改配置文件config.py::
 
+    # sae数据库存储(sae数据库需要租金，不建议使用)
+    from base.daily_store import DailyStorer
+
+    import sae.const
+    DailyStorer.configure("base.db_store.DatabaseStorer",
+                          host=sae.const.MYSQL_HOST,
+                          port=int(sae.const.MYSQL_PORT),
+                          user=sae.const.MYSQL_USER,
+                          passwd=sae.const.MYSQL_PASS,
+                          db=sae.const.MYSQL_DB)
     # 用户名/密码
     username = "admin"
     password = "admin"
@@ -41,7 +51,7 @@ SAE环境搭建
 
 	# APP NAME
 	name: zhihurewen
-	# 定时采集 url后面的密码
+	# 定时采集
 	url: /operation/fetch
 	# 定时建立索引
 	url: /operation/index
