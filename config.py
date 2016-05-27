@@ -24,13 +24,16 @@ IMAGE_BUCKET = "dailyimage"
 from base.daily_store import DailyStorer
 
 # sae数据库存储(sae数据库需要租金，不建议使用)
-import sae.const
-DailyStorer.configure("base.db_store.DatabaseStorer",
-                      host=sae.const.MYSQL_HOST,
-                      port=int(sae.const.MYSQL_PORT),
-                      user=sae.const.MYSQL_USER,
-                      passwd=sae.const.MYSQL_PASS,
-                      db=sae.const.MYSQL_DB)
+# import sae.const
+# DailyStorer.configure("base.db_store.DatabaseStorer",
+#                       host=sae.const.MYSQL_HOST,
+#                       port=int(sae.const.MYSQL_PORT),
+#                       user=sae.const.MYSQL_USER,
+#                       passwd=sae.const.MYSQL_PASS,
+#                       db=sae.const.MYSQL_DB)
+
+# sae kvdb数据库存储
+DailyStorer.configure("base.kvdb_store.KvdbStorer")
 
 #----------------------------------运维管理员-------------------------------------
 # admin 帐号密码

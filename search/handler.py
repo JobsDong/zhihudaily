@@ -78,15 +78,16 @@ def search(keywords, start, limit):
 
         for hit in results:
             news = daily_storer.get_news(hit['news_id'])
-            title = hit['title']
-            summary = hit['content']
-            hits.append(dict(
-                image_public_url=news.image_public_url,
-                share_url=news.share_url,
-                date=news.date,
-                title=title,
-                summary=summary,
-            ))
+            if news is not None:
+                title = hit['title']
+                summary = hit['content']
+                hits.append(dict(
+                    image_public_url=news.image_public_url,
+                    share_url=news.share_url,
+                    date=news.date,
+                    title=title,
+                    summary=summary,
+                ))
 
         return results.total_count, hits
     finally:

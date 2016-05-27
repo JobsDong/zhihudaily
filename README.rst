@@ -19,13 +19,17 @@ SAE环境搭建
     # sae数据库存储(sae数据库需要租金，不建议使用)
     from base.daily_store import DailyStorer
 
-    import sae.const
-    DailyStorer.configure("base.db_store.DatabaseStorer",
-                          host=sae.const.MYSQL_HOST,
-                          port=int(sae.const.MYSQL_PORT),
-                          user=sae.const.MYSQL_USER,
-                          passwd=sae.const.MYSQL_PASS,
-                          db=sae.const.MYSQL_DB)
+    # import sae.const
+    # DailyStorer.configure("base.db_store.DatabaseStorer",
+    #                        host=sae.const.MYSQL_HOST,
+    #                        port=int(sae.const.MYSQL_PORT),
+    #                        user=sae.const.MYSQL_USER,
+    #                        passwd=sae.const.MYSQL_PASS,
+    #                        db=sae.const.MYSQL_DB)
+
+    # sae kvdb数据库存储
+    DailyStorer.configure("base.kvdb_store.KvdbStorer")
+
     # 用户名/密码
     username = "admin"
     password = "admin"
