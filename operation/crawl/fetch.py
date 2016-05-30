@@ -11,7 +11,7 @@ import logging
 import hashlib
 import config
 import zhihu
-from daily.dao import DailyDao
+from base.daily_store import DailyStorer, News
 from search.fts_search import FTSSearcher
 from utils.extract_util import extract_text
 
@@ -28,17 +28,16 @@ def not_exists_news_ids(date_str, latest_news_ids):
     Returns:
       list: not_exists_news_ids
     """
-    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
-                   config.DB_PASS, config.DB_NAME)
+    daily_storer = DailyStorer()
     not_exists_news_ids = []
     try:
-        exists_news_ids = [str(news[1]) for news
-                           in dao.get_news_list(date_str)]
+        exists_news_ids = [str(news.news_id) for news
+                           in daily_storer.filter_news_list(date_str)]
         for news_id in latest_news_ids:
             if str(news_id) not in exists_news_ids:
                 not_exists_news_ids.append(news_id)
     finally:
-        dao.close()
+        daily_storer.close()
     return not_exists_news_ids
 
 
@@ -87,30 +86,37 @@ def index_news_list(news_list):
 
 
 def get_news_list(date_str):
-    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
-                   config.DB_PASS, config.DB_NAME)
+    daily_storer = DailyStorer()
     news_list = []
     try:
-        wait_for_indexed_news_list = dao.get_news_list(date_str)
+        wait_for_indexed_news_list = daily_storer.filter_news_list(date_str)
         for news in wait_for_indexed_news_list:
-            news_list.append(dict(news_id=news[1], title=news[2], body=news[5]))
+            news_list.append(dict(news_id=news.news_id, title=news.title,
+                                  body=news.body))
         return news_list
     finally:
-        dao.close()
+        daily_storer.close()
 
 
 def store_news_list(news_list):
     """将news_list保存到数据库中
     """
-    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
-                   config.DB_PASS, config.DB_NAME)
+    daily_storer = DailyStorer()
     try:
-        for news in news_list:
-            dao.insert(news['public_image_url'],
-                       news['date_str'],
-                       news['news'])
+        for news_json in news_list:
+            daily_storer.add_news(News(
+                news_json['news']['id'],
+                news_json['news']['share_url'],
+                news_json['news']['title'],
+                news_json['date_str'],
+                news_json['news']['body'],
+                news_json['news']['image'],
+                news_json['news']['image_source'],
+                news_json['public_image_url'],
+
+            ))
     finally:
-        dao.close()
+        daily_storer.close()
 
 
 def fetch_image(news_url, image_url):

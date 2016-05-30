@@ -4,10 +4,9 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import config
 import logging
 from base.handler import BaseHandler
-from daily.dao import DailyDao
+from base.daily_store import DailyStorer
 from utils.date_util import today_str, yesterday_date_str, tomorrow_date_str
 from utils.cache_util import cached
 
@@ -45,17 +44,17 @@ class DailyHandler(BaseHandler):
 def get_daily_news(date_str):
     """获取日报信息
     """
+    daily_storer = DailyStorer()
     news_list = []
-    dao = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
-                   config.DB_PASS, config.DB_NAME)
     try:
-        newses = dao.get_news_list(date_str)
+        newses = daily_storer.filter_news_list(date_str)
+        newses.reverse()
         if newses:
             for news in newses:
-                news_list.append(dict(share_url=news[3],
-                                      image_public_url=news[8],
-                                      image_source=news[7],
-                                      title=news[2]))
+                news_list.append(dict(share_url=news.share_url,
+                                      image_public_url=news.image_public_url,
+                                      image_source=news.image_source,
+                                      title=news.title))
         return news_list
     finally:
-        dao.close()
+        daily_storer.close()
