@@ -4,13 +4,12 @@
 
 __author__ = ['"wuyadong" <wuyadong311521@gmail.com>']
 
-import config
 import logging
 import traceback
 from base.handler import BaseHandler
+from base.daily_store import DailyStorer
 from utils.pagination_util import Paginator, InvalidPageError
 
-from daily.dao import DailyDao
 from search.fts_search import FTSSearcher, FTSSearchError
 
 
@@ -71,26 +70,26 @@ def search(keywords, start, limit):
       tuple: (total_count, results)
     """
     fts_searcher = FTSSearcher()
+    daily_storer = DailyStorer()
 
-    db = DailyDao(config.DB_HOST, config.DB_PORT, config.DB_USER,
-                  config.DB_PASS, config.DB_NAME)
     try:
         hits = []
         results = fts_searcher.search(keywords, start=start, limit=limit)
 
         for hit in results:
-            news = db.get_news(hit['news_id'])
-            title = hit['title']
-            summary = hit['content']
-            hits.append(dict(
-                image_public_url=news[8],
-                share_url=news[3],
-                date=news[4],
-                title=title,
-                summary=summary,
-            ))
+            news = daily_storer.get_news(hit['news_id'])
+            if news is not None:
+                title = hit['title']
+                summary = hit['content']
+                hits.append(dict(
+                    image_public_url=news.image_public_url,
+                    share_url=news.share_url,
+                    date=news.date,
+                    title=title,
+                    summary=summary,
+                ))
 
         return results.total_count, hits
     finally:
-        db.close()
+        daily_storer.close()
         fts_searcher.close()

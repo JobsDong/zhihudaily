@@ -10,7 +10,7 @@ import config
 from base.handler import BaseHandler
 from utils.date_util import today_str
 from crawl import zhihu
-from crawl import fetch
+from crawl import fetch as fetch_apis
 
 
 class OperationHandler(BaseHandler):
@@ -69,21 +69,21 @@ def fetch_zhihu_daiy(params):
         latest_news = zh.get_before_news(date_str)
 
     # 获取最新的news_id列表
-    latest_news_ids = fetch.extract_news_ids(latest_news)
-    date_str = fetch.extract_date_str(latest_news)
+    latest_news_ids = fetch_apis.extract_news_ids(latest_news)
+    date_str = fetch_apis.extract_date_str(latest_news)
 
     # 找出数据库中没有的news_id列表
-    not_exists_news_ids = fetch.not_exists_news_ids(date_str, latest_news_ids)
+    not_exists_news_ids = fetch_apis.not_exists_news_ids(date_str, latest_news_ids)
 
     # 获取news和下载图片
     not_exists_news_ids.reverse()
-    wait_for_store_news_list = fetch.fetch_news_list(not_exists_news_ids)
+    wait_for_store_news_list = fetch_apis.fetch_news_list(not_exists_news_ids)
 
     # 保存图片
-    wait_for_store_news_list = fetch.store_images(wait_for_store_news_list, date_str)
+    wait_for_store_news_list = fetch_apis.store_images(wait_for_store_news_list, date_str)
 
     # 保存news到数据库中
-    fetch.store_news_list(wait_for_store_news_list)
+    fetch_apis.store_news_list(wait_for_store_news_list)
 
 
 def index_zhihu_daily(params):
@@ -93,6 +93,6 @@ def index_zhihu_daily(params):
         date_str = today_str()
     else:
         date_str = params['date'][0]
-    news_list = fetch.get_news_list(date_str)
+    news_list = fetch_apis.get_news_list(date_str)
     if news_list:
-        fetch.index_news_list(news_list)
+        fetch_apis.index_news_list(news_list)

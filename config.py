@@ -20,17 +20,22 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 # 图片存储的bucket name
 IMAGE_BUCKET = "dailyimage"
 
-#---------------------------------数据库----------------------------------------
-import sae.const
+#---------------------------------日报数据存储------------------------------------
+from base.daily_store import DailyStorer
 
-# 数据库配置
-DB_HOST = sae.const.MYSQL_HOST
-DB_NAME = sae.const.MYSQL_DB
-DB_USER = sae.const.MYSQL_USER
-DB_PASS = sae.const.MYSQL_PASS
-DB_PORT = int(sae.const.MYSQL_PORT)
+# sae数据库存储(sae数据库需要租金，不建议使用)
+# import sae.const
+# DailyStorer.configure("base.db_store.DatabaseStorer",
+#                       host=sae.const.MYSQL_HOST,
+#                       port=int(sae.const.MYSQL_PORT),
+#                       user=sae.const.MYSQL_USER,
+#                       passwd=sae.const.MYSQL_PASS,
+#                       db=sae.const.MYSQL_DB)
 
-#----------------------------------管理员---------------------------------------
+# sae kvdb数据库存储
+DailyStorer.configure("base.kvdb_store.KvdbStorer")
+
+#----------------------------------运维管理员-------------------------------------
 # admin 帐号密码
 username = "admin"
 password = "admin"

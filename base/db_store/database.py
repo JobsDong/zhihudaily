@@ -25,7 +25,7 @@ class BaseDao(object):
         self._last_use_time = time.time()
         self._max_idle_time = 30
         try:
-            self.reconnect()
+            self._reconnect()
         except Exception, e:
             import traceback
             stack = traceback.format_exc()
@@ -36,7 +36,7 @@ class BaseDao(object):
             self._db.close()
             self._db = None
 
-    def reconnect(self):
+    def _reconnect(self):
         self.close()
         self._db = MySQLdb.connect(**self._db_args)
         self._db.autocommit(True)
@@ -44,9 +44,9 @@ class BaseDao(object):
     def _ensure_connected(self):
         if (self._db is None) or \
                 (time.time() - self._last_use_time > self._max_idle_time):
-            self.reconnect()
+            self._reconnect()
         self._last_use_time = time.time()
 
-    def _cursor(self):
+    def cursor(self):
         self._ensure_connected()
         return self._db.cursor()
