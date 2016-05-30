@@ -16,9 +16,13 @@ SAE环境搭建
 
 3. 修改配置文件config.py::
 
-    # sae数据库存储(sae数据库需要租金，不建议使用)
+    # 配置数据存储引擎（基于kvdb, mysql）由于数据库需要租金，建议使用kvdb
     from base.daily_store import DailyStorer
 
+    # sae kvdb数据库存储
+    DailyStorer.configure("base.kvdb_store.KvdbStorer")
+
+    # sae mysql数据库存储
     # import sae.const
     # DailyStorer.configure("base.db_store.DatabaseStorer",
     #                        host=sae.const.MYSQL_HOST,
@@ -27,10 +31,8 @@ SAE环境搭建
     #                        passwd=sae.const.MYSQL_PASS,
     #                        db=sae.const.MYSQL_DB)
 
-    # sae kvdb数据库存储
-    DailyStorer.configure("base.kvdb_store.KvdbStorer")
 
-    # 用户名/密码
+    # operation 用户名/密码
     username = "admin"
     password = "admin"
 

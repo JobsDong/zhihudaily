@@ -48,6 +48,7 @@ def get_daily_news(date_str):
     news_list = []
     try:
         newses = daily_storer.filter_news_list(date_str)
+        newses.reverse()
         if newses:
             for news in newses:
                 news_list.append(dict(share_url=news.share_url,
