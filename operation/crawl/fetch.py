@@ -111,7 +111,7 @@ def store_news_list(news_list):
                 news_json['date_str'],
                 news_json['news']['body'],
                 news_json['news']['image'],
-                news_json['news']['image_source'],
+                news_json['news'].get('image_source', ''),
                 news_json['public_image_url'],
 
             ))
