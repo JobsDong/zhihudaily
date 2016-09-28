@@ -1,0 +1,15 @@
+setup.cfg
+setup.py
+scs_sdk.egg-info/PKG-INFO
+scs_sdk.egg-info/SOURCES.txt
+scs_sdk.egg-info/dependency_links.txt
+scs_sdk.egg-info/top_level.txt
+sinastorage/__init__.py
+sinastorage/bucket.py
+sinastorage/compat.py
+sinastorage/multipart.py
+sinastorage/streaming.py
+sinastorage/utils.py
+sinastorage/vendored/__init__.py
+sinastorage/vendored/filechunkio.py
+sinastorage/vendored/six.py

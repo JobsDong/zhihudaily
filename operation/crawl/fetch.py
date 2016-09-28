@@ -14,8 +14,8 @@ import zhihu
 from base.daily_store import DailyStorer, News
 from search.fts_search import FTSSearcher
 from utils.extract_util import extract_text
-
-from sae.storage import Connection
+from sinastorage.bucket import SCSBucket
+import sinastorage
 
 
 def not_exists_news_ids(date_str, latest_news_ids):
@@ -140,7 +140,8 @@ def fetch_image(news_url, image_url):
 def store_images(news_list, date_str):
     """保存images
     """
-    con = Connection()
+    sinastorage.setDefaultAppInfo(config.image_accesskey, config.image_secretkey)
+    scs_bucket = SCSBucket(config.image_bucket, secure=False)
     news_list_copy = []
     for news in news_list:
         a_news_copy = dict(news.items())
@@ -149,9 +150,9 @@ def store_images(news_list, date_str):
         image_url = a_news_copy.pop('image_url')
         # 保存image
         object_name = hashlib.md5(image_url).hexdigest()
-        con.put_object(config.IMAGE_BUCKET, object_name, image_data, image_type)
-        public_image_url = con.generate_url(config.IMAGE_BUCKET, object_name)
-
+        scs_bucket.put(object_name, data=image_data, mimetype=image_type)
+        public_image_url = "http://%s.sinacloud.net/%s" % (
+            config.image_bucket, object_name)
         a_news_copy['public_image_url'] = public_image_url
         a_news_copy['date_str'] = date_str
         news_list_copy.append(a_news_copy)

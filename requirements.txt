@@ -3,3 +3,4 @@ mysql-python
 lxml==2.3.4
 pylibmc
 whoosh
+scs-sdk
