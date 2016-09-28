@@ -1,0 +1,21 @@
+Metadata-Version: 1.1
+Name: scs-sdk
+Version: 1.1.6
+Summary: Python SDK For 新浪云存储
+Home-page: http://open.sinastorage.com/
+Author: sina cloud storage
+Author-email: hanchao3@staff.sina.com.cn
+License: MIT
+Download-URL: https://github.com/SinaCloudStorage/SinaStorage-SDK-Python
+Description: UNKNOWN
+Keywords: sina,scs,sinacloudstorage
+Platform: Posix; MacOS X; Windows
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Internet
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4

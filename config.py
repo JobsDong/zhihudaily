@@ -18,7 +18,9 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 
 #---------------------------------图片bucket------------------------------------
 # 图片存储的bucket name
-IMAGE_BUCKET = "dailyimage"
+image_accesskey = "fake_key"
+image_secretkey = "fake_secret"
+image_bucket = "dailyimage"
 
 #---------------------------------日报数据存储------------------------------------
 from base.daily_store import DailyStorer
